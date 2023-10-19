@@ -1,7 +1,7 @@
 from table_reader import TableReader
 from detail import Detail
 from table_creator import TableCreator
-from data import data
+from const import data, BASE_DIR_STR
 
 class Main:
     
@@ -11,9 +11,13 @@ class Main:
 
         detail = Detail(**data)
         
+        # находит путь к таблице
+        
+        costs_table_dir = BASE_DIR_STR + '/detail_making_costs.xlsx'
+        
         # читает таблицы и добавляет в деталь стоимость металла, резки, врезки
 
-        table_reader = TableReader('detail_making_costs.xlsx')
+        table_reader = TableReader(costs_table_dir)
         detail.metal_price = table_reader.get_metal_cost(detail.metal_type)
         detail.cutting_price = table_reader.get_cutting_cost(detail.metal_category, detail.metal_thickness, detail.details_amount)
         detail.in_cutting_price = table_reader.get_in_cutting_cost(detail.metal_thickness)

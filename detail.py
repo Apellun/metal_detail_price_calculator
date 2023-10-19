@@ -11,14 +11,14 @@ class Detail:
     in_cutting_amount: int
     details_amount: int
     complects_amount: int
-    metal_price: float = NotImplemented
-    cutting_price: float = NotImplemented
-    in_cutting_price: float = NotImplemented
-    full_in_cutting_price: float = NotImplemented
-    full_cutting_price: float = NotImplemented
-    detail_price: float = NotImplemented
-    complect_price: float = NotImplemented
-    final_price: float = NotImplemented
+    metal_price: float = None
+    cutting_price: float = None
+    in_cutting_price: float = None
+    full_in_cutting_price: float = None
+    full_cutting_price: float = None
+    detail_price: float = None
+    complect_price: float = None
+    final_price: float = None
     
     def _set_detail_price(self) -> None:
         """

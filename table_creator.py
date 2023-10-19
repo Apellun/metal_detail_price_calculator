@@ -1,13 +1,15 @@
 import pandas as pd
 from detail import Detail
+from const import BASE_DIR_STR
 
 class TableCreator:
     def __init__(self, detail: Detail):
         self.detail = detail
-        self._dict = NotImplemented
-        self.detail_df = NotImplemented
-        self.previous_df = NotImplemented
-        self.full_df = NotImplemented
+        self.detail_df = None
+        self.full_df = None
+        self._accounts_table_path = None
+        self._dict = None
+        self._previous_df = None
         
     def _create_dict(self) -> None:
         """
@@ -39,7 +41,8 @@ class TableCreator:
         """
         Читает таблицу с информацией о предыдущих деталях.
         """
-        self.previous_df = pd.read_excel('accounts.xlsx', index_col=0).reset_index(drop=True)
+        self._accounts_table_path = BASE_DIR_STR + '/accounts.xlsx'
+        self.previous_df = pd.read_excel(self._accounts_table_path, index_col=0).reset_index(drop=True)
         
     def _create_full_df(self) -> None:
         """
@@ -55,10 +58,11 @@ class TableCreator:
         Запускает создание таблицы и сохраняет ее.
         """
         self._create_full_df()
-        self.full_df.to_excel('accounts.xlsx')
+        self.full_df.to_excel(self._accounts_table_path)
         
     def create_doc_to_print(self) -> None:
         """
         Создает отдельную таблицу с текущей деталью для печати.
         """
-        self.detail_df.to_excel('doc_to_print.xlsx')
+        table_dir = BASE_DIR_STR + '/doc_to_print.xlsx'
+        self.detail_df.to_excel(table_dir)
