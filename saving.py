@@ -11,7 +11,7 @@ class Saving:
         
     def _create_detail_df(self) -> None:
         """
-        Создает из словаря таблицу.
+        Создает из полей детали таблицу.
         """
         dict = {
         'Название чертежа': self.detail.blueprint_name,
@@ -32,7 +32,7 @@ class Saving:
         
     def _add_detail_to_accounts(self) -> None:
         """
-        Соединяет старые значения из таблицы с новым.
+        Создает таблицу с предыдущими деталями и новой деталью.
         """
         try:
             accounts_df = pd.read_excel(self.accounting_table_path, index_col=0).reset_index(drop=True)
@@ -41,7 +41,10 @@ class Saving:
         except FileNotFoundError:
             self.full_df = self.detail_df
     
-    def set_accounting_table_path(self, accounts_path=None):
+    def set_accounting_table_path(self, accounts_path: str=None) -> None:
+        """
+        Задает путь к таблице для сохранения деталей.
+        """
         if accounts_path is None:
             self.accounting_table_path = DEFAULT_ACCOUNTS_TABLE
         elif accounts_path != "":
@@ -49,7 +52,7 @@ class Saving:
         
     def save_detail(self) -> None:
         """
-        Запускает создание таблицы и сохраняет ее в общий сипсок деталей.
+        Запускает создание таблицы и сохраняет ее в таблицу с деталями.
         """
         self._create_detail_df()
         self._add_detail_to_accounts()
@@ -61,7 +64,7 @@ class Saving:
         
     def create_doc_to_print(self, folder, name) -> None:
         """
-        Создает отдельную таблицу с текущей деталью для печати.
+        Создает файл с таблицей по текущей детали для печати.
         """
         if self.detail_df is None:
             self._create_detail_df()
