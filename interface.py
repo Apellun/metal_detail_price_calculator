@@ -4,8 +4,6 @@ from saving import Saving
 from detail import Detail
 from const import metal_categories_list
 
-data={}
-
 class Interface:
     def __init__(self):
         self.table_reader = TableReader()
@@ -157,7 +155,7 @@ class Interface:
         
         self.saving.detail = self.detail
         while True:
-            event, values = save_doc_to_print_window.read()
+            event, values = save_doc_to_print_window.read(timeout=1000)
             if event == sg.WIN_CLOSED:
                 break
             elif event == "Сохранить":

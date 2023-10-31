@@ -34,8 +34,12 @@ class Saving:
         """
         Соединяет старые значения из таблицы с новым.
         """
-        accounts_df = pd.read_excel(self.accounting_table_path, index_col=0).reset_index(drop=True)
-        self.full_df = pd.concat([accounts_df, self.detail_df])
+        try:
+            accounts_df = pd.read_excel(self.accounting_table_path, index_col=0).reset_index(drop=True)
+            self.full_df = pd.concat([accounts_df, self.detail_df]).reset_index(drop=True)
+            self.full_df.index = self.full_df.index + 1
+        except FileNotFoundError:
+            self.full_df = self.detail_df
     
     def set_accounting_table_path(self, accounts_path=None):
         if accounts_path is None:
@@ -49,7 +53,11 @@ class Saving:
         """
         self._create_detail_df()
         self._add_detail_to_accounts()
-        self.full_df.to_excel(self.accounting_table_path)
+        try:
+            self.full_df.to_excel(self.accounting_table_path)
+        except FileNotFoundError:
+            with open(self.accounting_table_path, 'w', encoding='utf-8'):
+                self.full_df.to_excel(self.accounting_table_path)
         
     def create_doc_to_print(self, table_path) -> None:
         """

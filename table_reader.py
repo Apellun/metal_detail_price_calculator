@@ -6,7 +6,7 @@ class TableReader:
         self.cutting_prices_df = None
         self.metal_prices_df = None
         self._cutting_prices_table_path = DEFAULT_PRICES_TABLE_PATH
-        self._metal_prices_table_path = DEFAULT_PRICES_TABLE_PATH
+        # self._metal_prices_table_path = DEFAULT_PRICES_TABLE_PATH
     
     def _set_metal_prices_table(self, metal_prices_table_path=None):
         if metal_prices_table_path is None:
