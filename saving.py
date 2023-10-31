@@ -59,10 +59,12 @@ class Saving:
             with open(self.accounting_table_path, 'w', encoding='utf-8'):
                 self.full_df.to_excel(self.accounting_table_path)
         
-    def create_doc_to_print(self, table_path) -> None:
+    def create_doc_to_print(self, folder, name) -> None:
         """
         Создает отдельную таблицу с текущей деталью для печати.
         """
         if self.detail_df is None:
             self._create_detail_df()
-        self.detail_df.to_excel(table_path)
+        file_path = f"{folder}/{name}.xlsx"
+        with open(file_path, 'w', encoding='utf-8'):
+            self.detail_df.to_excel(file_path)

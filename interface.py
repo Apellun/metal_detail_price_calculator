@@ -14,7 +14,7 @@ class Interface:
         self.main_layout = [
             [sg.Button('Настройки')],
             [sg.Text('Название чертежа:'), sg.InputText(size=[50, 1], key="Название чертежа")],
-            [sg.Text('Металл:'), sg.InputCombo(metal_categories_list, key="Категория металла"), sg.InputCombo(self.metals_list, key="Тип металла")],
+            [sg.Text('Металл:'), sg.InputCombo(metal_categories_list, key="Категория металла", readonly=True), sg.InputCombo(self.metals_list, key="Тип металла", readonly=True)],
             [sg.Text('Толщина металла:'), sg.InputText(key="Толщина металла")],
             [sg.Text('Площадь металла:'), sg.InputText(key="Площадь металла")],
             [sg.Text('Резка, м. п.:'), sg.InputText(key="Резка, м. п.")],
@@ -142,7 +142,7 @@ class Interface:
         
     def save_to_print(self):
         save_doc_to_print_layout = [
-        [sg.Text('Сохранить как:'), sg.Input(key='-PATH-', readonly=True), sg.SaveAs("Выбрать", file_types=(('*.xls', '*.xlsx'),))],
+        [sg.Text('Введите имя:'), sg.InputText(size=[20, 1], key='Имя'), sg.InputText(key='Папка'), sg.FolderBrowse("Выберите папку для сохранения")],
         [sg.Button('Сохранить')]
         ]
         save_doc_to_print_window = sg.Window(
@@ -160,14 +160,14 @@ class Interface:
                 break
             elif event == "Сохранить":
                 try:
-                    file_path = values['-PATH-']
-                    if file_path == '':
-                        raise Exception("Выберите имя и папку для сохранения.")
-                    if not file_path.lower().endswith((".xlsx", ".xls")):
-                        file_path += ".xlsx"
-                        with open(file_path, 'w', encoding='utf-8'):
-                            self.saving.create_doc_to_print(file_path)
-                        self.success_popup("Файл сохранен")
+                    file_name = values['Имя']
+                    file_folder = values['Папка']
+                    if file_folder == '':
+                        raise Exception("Выберите папку для сохранения.")
+                    if file_name == '':
+                        raise Exception("Укажите имя файла.")
+                    self.saving.create_doc_to_print(file_folder, file_name)
+                    self.success_popup("Файл сохранен")
                 except Exception as e:
                     self.exception_popup(e)
         save_doc_to_print_window.close()
