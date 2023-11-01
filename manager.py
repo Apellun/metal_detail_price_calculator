@@ -1,8 +1,10 @@
 import os
 from detail import Detail
+from table_reader import TableReader
+from saving import Saving
         
 class Manager:
-    def __init__(self, table_reader: object, saving: object):
+    def __init__(self, table_reader: TableReader, saving: Saving):
         self.table_reader = table_reader
         self.saving = saving
         self.detail = None
@@ -24,7 +26,7 @@ class Manager:
             'complects_amount': int(values["Количество комплектов"])
         }
 
-    def _create_prices_str(self, detail: object) -> str:
+    def _create_prices_str(self, detail: Detail) -> str:
         """
         Создает строку для вывода стоимости работ.
         """
@@ -61,7 +63,7 @@ class Manager:
         if os.path.exists(file_path):
             raise FileExistsError
             
-    def _create_detail(self, values: dict) -> object:
+    def _create_detail(self, values: dict) -> Detail:
         """
         Создает деталь, заполняет поля детали значениями
         из таблиц и расчетами, возвращает созданную деталь.

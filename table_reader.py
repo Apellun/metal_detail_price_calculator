@@ -44,7 +44,7 @@ class TableReader:
         if metal_prices_table_path != "":
             self._set_metal_prices_table(metal_prices_table_path)
         
-    def get_metals_list(self) -> None:
+    def get_metals_list(self) -> list:
         """
         Получает список доступных типов металла из таблицы.
         """
@@ -52,7 +52,7 @@ class TableReader:
             self.set_metal_prices_table()
         return self.metal_prices_df.index.values.tolist()
         
-    def get_metal_price(self, metal_type: str) -> None:
+    def get_metal_price(self, metal_type: str) -> float:
         """
         Возвращает из таблицы стоимость металла.
         """
@@ -73,7 +73,7 @@ class TableReader:
             else:
                 return float(self.cutting_prices_df.loc[metal_thickness].iloc[1])
         except Exception as e:
-            raise Exception(f'Цена резки не обнаружена.\n{e}')
+            raise Exception(f'Цена резки для введенных толщины и категории металла не обнаружена.\n{e}')
         
     def get_in_cutting_price(self, metal_thickness: float) -> float:
         """
@@ -82,5 +82,5 @@ class TableReader:
         try:
             return float(self.cutting_prices_df.loc[metal_thickness].iloc[2])
         except Exception as e:
-            raise Exception(f'Цена врезки не обнаружена.\n{e}')
+            raise Exception(f'Цена врезки для введенных толщины и категории металла не обнаружена.\n{e}')
     
