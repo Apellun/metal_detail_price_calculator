@@ -5,21 +5,19 @@ class TableReader:
     def __init__(self):
         self.cutting_prices_df = None
         self.metal_prices_df = None
+        self.metal_prices_table_path = DEFAULT_PRICES_TABLE_PATH
         self._cutting_prices_table_path = DEFAULT_PRICES_TABLE_PATH
     
-    def _set_metal_prices_table(self, metal_prices_table_path: str=None) -> None:
+    def _set_metal_prices_table(self, metal_prices_table_path=None) -> None:
         """
         Устанавливает таблицу со стоимостью металлов.
         """
-        if metal_prices_table_path is None:
-            metal_prices_table_path = DEFAULT_PRICES_TABLE_PATH
-        if metal_prices_table_path != "":
-            try:
-                self.metal_prices_df = pd.read_excel(metal_prices_table_path, sheet_name='стоимость металлов', index_col=0)
-            except:
-                raise Exception('Не удалось прочитать таблицу.')
+        try:
+            self.metal_prices_df = pd.read_excel(metal_prices_table_path, sheet_name='стоимость металлов', index_col=0)
+        except Exception as e:
+            raise Exception(f'Не удалось прочитать таблицу.\n{e}')
     
-    def _set_cutting_prices_table_path(self, cutting_prices_table_path: str=None) -> None:
+    def _set_cutting_prices_table_path(self, cutting_prices_table_path=None) -> None:
         """
         Устанавливает путь к таблице со стоимостью резки и врезки.
         """
@@ -34,22 +32,24 @@ class TableReader:
         """
         try:
             self.cutting_prices_df = pd.read_excel(self._cutting_prices_table_path, sheet_name=f'резка и врезка {metal_category}', index_col=0)
-        except:
-                raise Exception('Таблица не найдена.')
+        except Exception as e:
+                raise Exception(f'Таблица не найдена.\n{e}')
             
-    def set_tables(self, metal_prices_table_path: str=None, cutting_prices_table_path: str=None) -> None:
+    def set_metal_prices_table(self, metal_prices_table_path=None) -> None:
         """
         Устанавливает пути к таблицам с ценами.
         """
-        self._set_metal_prices_table(metal_prices_table_path)
-        # self._set_cutting_prices_table_path(cutting_prices_table_path)
+        if metal_prices_table_path is None:
+            metal_prices_table_path = DEFAULT_PRICES_TABLE_PATH
+        if metal_prices_table_path != "":
+            self._set_metal_prices_table(metal_prices_table_path)
         
     def get_metals_list(self) -> None:
         """
         Получает список доступных типов металла из таблицы.
         """
         if self.metal_prices_df is None:
-            self._set_metal_prices_table()
+            self.set_metal_prices_table()
         return self.metal_prices_df.index.values.tolist()
         
     def get_metal_price(self, metal_type: str) -> None:
@@ -57,9 +57,9 @@ class TableReader:
         Возвращает из таблицы стоимость металла.
         """
         try:
-            return self.metal_prices_df.loc[metal_type].iloc[0]
-        except:
-            raise Exception('Цена металла не обнаружена.')
+            return float(self.metal_prices_df.loc[metal_type].iloc[0])
+        except Exception as e:
+            raise Exception(f'Цена металла не обнаружена.\n{e}')
         
     def get_cutting_price(self, metal_category: str, metal_thickness: float, details_amount: int) -> float:
         """
@@ -69,18 +69,18 @@ class TableReader:
         
         try:
             if details_amount <= 100:
-                return self.cutting_prices_df.loc[metal_thickness].iloc[0]
+                return float(self.cutting_prices_df.loc[metal_thickness].iloc[0])
             else:
-                return self.cutting_prices_df.loc[metal_thickness].iloc[1]
-        except:
-            raise Exception(f'Цена резки не обнаружена.')
+                return float(self.cutting_prices_df.loc[metal_thickness].iloc[1])
+        except Exception as e:
+            raise Exception(f'Цена резки не обнаружена.\n{e}')
         
     def get_in_cutting_price(self, metal_thickness: float) -> float:
         """
         Возвращает из таблицы стоимость врезки.
         """
         try:
-            return self.cutting_prices_df.loc[metal_thickness].iloc[2]
-        except:
-            raise Exception('Цена врезки не обнаружена.')
+            return float(self.cutting_prices_df.loc[metal_thickness].iloc[2])
+        except Exception as e:
+            raise Exception(f'Цена врезки не обнаружена.\n{e}')
     

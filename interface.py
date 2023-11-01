@@ -1,17 +1,11 @@
 import PySimpleGUI as sg
-from table_reader import TableReader
-from saving import Saving
-from detail import Detail
 from const import metal_categories_list
-import tools
+from manager import Manager
 
 class Interface:
     def __init__(self):
-        self.table_reader = TableReader()
-        self.saving = Saving()
-        self.metals_list = self.table_reader.get_metals_list()
-        self.detail = None
-        
+        self.manager = Manager()
+        self.metals_list = self.manager.get_metals_list()
         self.main_layout = [
             [sg.Button('Настройки')],
             [sg.Text('Название чертежа:'), sg.InputText(size=[50, 1], key="Название чертежа")],
@@ -22,7 +16,7 @@ class Interface:
             [sg.Text('Врезка, количество:'), sg.InputText(key="Врезка, количество")],
             [sg.Text('Количество деталей:'), sg.InputText(key="Количество деталей")],
             [sg.Text('Количество комплектов:'), sg.InputText(key="Количество комплектов")],
-            [sg.Button('Создать деталь и посчитать стоимость'), sg.Button('Сохранить деталь'), sg.Button('Сохранить файл для печати')],
+            [sg.Button('Создать деталь и рассчитать стоимость'), sg.Button('Сохранить расчет'), sg.Button('Сохранить файл для печати')],
         ]
         self.main_window = sg.Window(
             "Расчет стоимости резки и гибки",
@@ -32,18 +26,6 @@ class Interface:
             font=(60),
             finalize=True
             )
-        
-    def _create_detail(self, values: dict) -> None:
-        """
-        Создает деталь, заполняет поля значениями
-        из таблиц и счиатет стоимость работы.
-        """
-        data = tools.create_dict(values)
-        self.detail = Detail(**data)
-        self.detail.metal_price = self.table_reader.get_metal_price(self.detail.metal_type)
-        self.detail.cutting_price = self.table_reader.get_cutting_price(self.detail.metal_category, self.detail.metal_thickness, self.detail.details_amount)
-        self.detail.in_cutting_price = self.table_reader.get_in_cutting_price(self.detail.metal_thickness)
-        self.detail.set_prices()
     
     def exception_popup(self, exception: str) -> None:
         """
@@ -67,27 +49,44 @@ class Interface:
             font=(90)
             ) 
         
+    def overvrite_file_window(self, values):
+        layout = [
+        [sg.Text("Файл с таким именем уже существует. Перезаписать?")],
+        [sg.Button("OK"), sg.Button("Отмена")]
+        ]
+        window = sg.Window(
+            "Подтвердите действие",
+            layout,
+            font=(90)
+        )
+        while True:
+            event, _ = window.read()
+            if event == sg.WINDOW_CLOSED or event == "Отмена":
+                window.close()
+                break
+            elif event == "OK":
+                self.manager.overvrite_file(values)
+                window.close()
+                break
+          
     def count_prices(self, values: dict) -> None:
         """
         Запускает создание детали и подсчет цен, показывает
         попап со стоимостью работ.
         """
         try:
-            tools.validate_fields(values)
-            self._create_detail(values)
-            prices_str = tools.create_prices_str(self.detail)
-            self.success_popup(prices_str, "Стоимость")
+            prices = self.manager.count_prices(values)
+            self.success_popup(prices, "Стоимость")
         except Exception as e:
             self.exception_popup(e)
         
-    def save_detail(self) -> None:
+    def save_accounts(self) -> None:
         """
         Сохраняет информацию о детали в таблицу.
         """
-        self.saving.detail = self.detail
         try:
-            self.saving.save_detail()
-            self.success_popup("Деталь сохранена")
+            self.manager.save_accounts()
+            self.success_popup("Расчет сохранен")
         except Exception as e:
             self.exception_popup(e)  
           
@@ -97,10 +96,10 @@ class Interface:
         выбрать другую таблицу для созранения деталей, а также откатить все
         изменения к настройкам по умолчанию.
         """
+        metal_prices_table_path, accounting_table_path = self.manager.get_file_paths()
         settings_layout =[
-            [sg.Text('Файл со стоимостью металлов:'), sg.Input(readonly=True), sg.FileBrowse("Выбрать", file_types=(("Excel files", "*.xlsx"),))],
-            # [sg.Text('Файл со стоимостью резки и врезки:'), sg.Input(readonly=True), sg.FileBrowse("Выбрать", file_types=(("Excel files", "*xlsx"),))],
-            [sg.Text('Файл с таблицей для сохранения детали:'), sg.Input(readonly=True), sg.FileBrowse("Выбрать", file_types=(("Excel files", "*.xlsx"),))],
+            [sg.Text('Таблица со стоимостью металлов:'), sg.Text(metal_prices_table_path, size=(30,2), key='Путь к таблице металлов'), sg.FileBrowse("Выбрать другой", file_types=(("Excel files", "*.xlsx"), ("Excel files", "*.xls")), key="Таблица металлов")],
+            [sg.Text('Таблица для сохранения рассчетов:'), sg.Text(accounting_table_path, size=(30,2), key='Путь к таблице с рассчетами'), sg.FileBrowse("Выбрать другой", file_types=(("Excel files", "*.xlsx"), ("Excel files", "*.xls")), key="Таблица рассчетов")],
             [sg.Button('Сохранить'), sg.Button('По умолчанию')]           
             ]
         settings_window = sg.Window(
@@ -111,27 +110,24 @@ class Interface:
             element_padding=10,
             font=(60)
             )
-        
         while True:
             event, values = settings_window.read()
             if event == sg.WIN_CLOSED:
                 break
-            
             elif event == "Сохранить":
                 try:
-                    self.table_reader.set_tables(values[0])
-                    self.saving.set_accounting_table_path(values[1])
+                    self.manager.save_settings(values['Таблица металлов'], values['Таблица рассчетов'])
+                    self.main_window['Тип металла'].update(values=self.manager.get_metals_list())
+                    self.success_popup("Таблицы установлены.")
                 except Exception as e:
                     self.exception_popup(e)
-                self.main_window['Тип металла'].update(values=self.table_reader.get_metals_list())#TODO: refactor??
-                break
-            
             elif event == "По умолчанию":
-                self.table_reader.set_tables()
-                self.saving.set_accounting_table_path()
-                self.main_window['Тип металла'].update(values=self.table_reader.get_metals_list())
-                break
-            
+                self.manager.save_settings()
+                self.main_window['Тип металла'].update(values=self.manager.get_metals_list())
+                metal_prices_table_path, accounting_table_path = self.manager.get_file_paths()
+                settings_window['Путь к таблице металлов'].update(metal_prices_table_path)
+                settings_window['Путь к таблице с рассчетами'].update(accounting_table_path)
+                self.success_popup("Установлены таблицы по умолчанию.")
         settings_window.close()
         
     def save_to_print(self) -> None:
@@ -151,21 +147,16 @@ class Interface:
             element_padding=10,
             font=(60)
         )
-        self.saving.detail = self.detail
-        
         while True:
             event, values = save_doc_to_print_window.read(timeout=1000)
             if event == sg.WIN_CLOSED:
                 break
             elif event == "Сохранить":
                 try:
-                    file_name, file_folder = values['Имя'], values['Папка']
-                    if file_folder == '':
-                        raise Exception("Выберите папку для сохранения.")
-                    if file_name == '':
-                        raise Exception("Укажите имя файла.")
-                    self.saving.create_doc_to_print(file_folder, file_name)
+                    self.manager.save_doc_to_print(values)
                     self.success_popup("Файл сохранен")
+                except FileExistsError:
+                    self.overvrite_file_window(values)
                 except Exception as e:
                     self.exception_popup(e)   
         save_doc_to_print_window.close()
@@ -179,10 +170,10 @@ class Interface:
                 event, values = self.main_window.read()
                 if event == sg.WIN_CLOSED:
                     break
-                elif event == 'Создать деталь и посчитать стоимость':
+                elif event == 'Создать деталь и рассчитать стоимость':
                     self.count_prices(values)    
-                elif event == 'Сохранить деталь':
-                    self.save_detail()
+                elif event == 'Сохранить расчет':
+                    self.save_accounts()
                 elif event == 'Сохранить файл для печати':
                     self.save_to_print()
                 elif event == 'Настройки':
