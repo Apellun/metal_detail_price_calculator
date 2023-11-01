@@ -1,10 +1,9 @@
 import PySimpleGUI as sg
 from const import metal_categories_list
-from manager import Manager
 
 class Interface:
-    def __init__(self):
-        self.manager = Manager()
+    def __init__(self, manager: object):
+        self.manager = manager
         self.metals_list = self.manager.get_metals_list()
         self.main_layout = [
             [sg.Button('Настройки')],
@@ -48,52 +47,11 @@ class Interface:
             title=title,
             font=(90)
             ) 
-        
-    def overvrite_file_window(self, values):
-        layout = [
-        [sg.Text("Файл с таким именем уже существует. Перезаписать?")],
-        [sg.Button("OK"), sg.Button("Отмена")]
-        ]
-        window = sg.Window(
-            "Подтвердите действие",
-            layout,
-            font=(90)
-        )
-        while True:
-            event, _ = window.read()
-            if event == sg.WINDOW_CLOSED or event == "Отмена":
-                window.close()
-                break
-            elif event == "OK":
-                self.manager.overvrite_file(values)
-                window.close()
-                break
-          
-    def count_prices(self, values: dict) -> None:
-        """
-        Запускает создание детали и подсчет цен, показывает
-        попап со стоимостью работ.
-        """
-        try:
-            prices = self.manager.count_prices(values)
-            self.success_popup(prices, "Стоимость")
-        except Exception as e:
-            self.exception_popup(e)
-        
-    def save_accounts(self) -> None:
-        """
-        Сохраняет информацию о детали в таблицу.
-        """
-        try:
-            self.manager.save_accounts()
-            self.success_popup("Расчет сохранен")
-        except Exception as e:
-            self.exception_popup(e)  
           
     def settings(self) -> None:
         """
         Окно настроек, позволяет загрузить другую таблицу с ценами металлов,
-        выбрать другую таблицу для созранения деталей, а также откатить все
+        выбрать другую таблицу для созранения деталей, а также откатить эти
         изменения к настройкам по умолчанию.
         """
         metal_prices_table_path, accounting_table_path = self.manager.get_file_paths()
@@ -130,11 +88,56 @@ class Interface:
                 self.success_popup("Установлены таблицы по умолчанию.")
         settings_window.close()
         
+    def count_prices(self, values: dict) -> None:
+        """
+        Запускает создание детали и подсчет цен, показывает
+        попап со стоимостью работ.
+        """
+        try:
+            prices = self.manager.count_prices(values)
+            self.success_popup(prices, "Стоимость")
+        except Exception as e:
+            self.exception_popup(e)
+        
+    def save_accounts(self) -> None:
+        """
+        Сохраняет информацию о расчете в таблицу
+        и выводит попа успеха.
+        """
+        try:
+            self.manager.save_accounts()
+            self.success_popup("Расчет сохранен")
+        except Exception as e:
+            self.exception_popup(e)  
+    
+    def overvrite_file_window(self, values: dict) -> None:
+        """
+        Окно, которое возникает если пользователь перезаписывает существующий файл.
+        Позволяет продолжить или отменить действие.
+        """
+        layout = [
+        [sg.Text("Файл с таким именем уже существует. Перезаписать?")],
+        [sg.Button("OK"), sg.Button("Отмена")]
+        ]
+        window = sg.Window(
+            "Подтвердите действие",
+            layout,
+            font=(90)
+        )
+        while True:
+            event, _ = window.read()
+            if event == sg.WINDOW_CLOSED or event == "Отмена":
+                break
+            elif event == "OK":
+                self.manager.overvrite_file(values)
+                break
+        window.close()
+        
     def save_to_print(self) -> None:
         """
-        Окно сохранения документа с данными только о текущей
-        детали для печати. Позволяет выбрать имя и папку, в
-        которой сохранить файл.
+        Окно сохранения документа с данными только о текущем
+        расчете для печати. Позволяет выбрать имя файла и папку,
+        в которой сохранить файл.
         """
         save_doc_to_print_layout = [
         [sg.Text('Введите имя:'), sg.InputText(size=[20, 1], key='Имя'), sg.InputText(key='Папка'), sg.FolderBrowse("Выберите папку для сохранения")],
