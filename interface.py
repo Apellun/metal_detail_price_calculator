@@ -76,7 +76,7 @@ class Interface:
                 try:
                     self.manager.save_settings(values['Таблица металлов'], values['Таблица рассчетов'])
                     self.main_window['Тип металла'].update(values=self.manager.get_metals_list())
-                    self.success_popup("Таблицы установлены.")
+                    self.success_popup("Настройки обновлены.")
                 except Exception as e:
                     self.exception_popup(e)
             elif event == "По умолчанию":
@@ -85,7 +85,7 @@ class Interface:
                 metal_prices_table_path, accounting_table_path = self.manager.get_file_paths()
                 settings_window['Путь к таблице металлов'].update(metal_prices_table_path)
                 settings_window['Путь к таблице с рассчетами'].update(accounting_table_path)
-                self.success_popup("Установлены таблицы по умолчанию.")
+                self.success_popup("Установлены настройки по умолчанию.")
         settings_window.close()
         
     def count_prices(self, values: dict) -> None:
@@ -140,7 +140,7 @@ class Interface:
         в которой сохранить файл.
         """
         save_doc_to_print_layout = [
-        [sg.Text('Введите имя:'), sg.InputText(size=[20, 1], key='Имя'), sg.InputText(key='Папка'), sg.FolderBrowse("Выберите папку для сохранения")],
+        [sg.Text('Введите имя:'), sg.InputText(size=[10, 1], key='Имя', enable_events=True), sg.InputText("Папка для сохранения", key='Папка', size=[30, 1]), sg.FolderBrowse("Выбрать папку")],
         [sg.Button('Сохранить')]
         ]
         save_doc_to_print_window = sg.Window(
@@ -154,6 +154,9 @@ class Interface:
             event, values = save_doc_to_print_window.read(timeout=1000)
             if event == sg.WIN_CLOSED:
                 break
+            elif event == 'Имя':
+                if values['Имя'] == 'Введите имя':
+                    save_doc_to_print_window['Имя'].update(default_text='')
             elif event == "Сохранить":
                 try:
                     self.manager.save_doc_to_print(values)

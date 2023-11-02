@@ -35,15 +35,21 @@ class Manager:
                 f"Цена одного комплекта деталей: {detail.complect_price}\n"
                 f"Полная цена: {detail.final_price}")
         
-    def _validate_fields(self, values: dict) -> None:
+    def _validate_fields_not_empty(self, values: dict) -> None:
         """
-        Проверяет значения в полях на отсутствие пустых строк
-        и наличие числовых значений там, где они требуются.
-        """
+        Проверяет, что поля не пустые.
+        """    
         for index in values:
             value = values[index].strip()
             if value == "":
                 raise ValueError(f"{index}: поле не может быть пустым.")
+    
+    def _validate_fields_numeric(self, values: dict) -> None:
+        """
+        Проверяет, что в нужных полях указаны числовые значения.
+        """
+        for index in values:
+            value = values[index].strip()
             if index not in ["Название чертежа", "Категория металла", "Тип металла"] and not value.isdigit():
                 raise ValueError(f"{index}: введите числовое значение.")
     
@@ -55,7 +61,7 @@ class Manager:
         if table_path is not None and table_path != "":
             if not table_path.endswith((".xls", ".xlsx")):
                 raise Exception('Пожалуйста, убедитесь что выбраны таблицы формата excel (".xls", ".xlsx")')
-    
+        
     def _check_path_if_exists(self, file_path: str) -> None:
         """
         Проверяет, существует ли файл по заданному пути.
@@ -89,7 +95,7 @@ class Manager:
         """
         return self.table_reader.metal_prices_table_path, self.saving.accounting_table_path
     
-    def save_settings(self, metals_table_path=None, accounting_table_path=None) -> None:
+    def save_settings(self, metals_table_path: str=None, accounting_table_path: str=None) -> None:
         """
         Сохраняет настройки таблиц с металлами и расчетами.
         """
@@ -103,7 +109,8 @@ class Manager:
         Запускает проверку значений полей и затем создание детали,
         возвращает строку с расчетом цен.
         """
-        self._validate_fields(values)
+        self._validate_fields_not_empty(values)
+        self._validate_fields_numeric(values)
         self._create_detail(values)
         return self._create_prices_str(self.detail)
     
@@ -113,12 +120,13 @@ class Manager:
         """
         self.saving.save_accounts(self.detail)
     
-    def save_doc_to_print(self, values: dict) -> None: #TODO: separate validation?
-        file_name, file_folder = values['Имя'], values['Папка']
-        if file_name == '':
-            raise Exception("Укажите имя файла.")
-        if file_folder == '':
-            raise Exception("Выберите папку для сохранения.")
+    def save_doc_to_print(self, values: dict) -> None:
+        """
+        Запускает проверку полей, если поля не пустые, создает
+        путь для файла, запускает проверку, существует ли файл,
+        если нет — запускает сохрание расчета в файл для печати.
+        """
+        self._validate_fields_not_empty(values)
         saving_path = f"{values['Папка']}/{values['Имя']}.xlsx"
         self._check_path_if_exists(saving_path)
         self.saving.create_doc_to_print(self.detail, saving_path)

@@ -31,7 +31,7 @@ class Saving:
         
     def _add_detail_to_accounts(self) -> None:
         """
-        Создает таблицу с предыдущими деталями и новой деталью.
+        Объединяет таблицу с расчетами и новый расчет.
         """
         try:
             accounts_df = pd.read_excel(self.accounting_table_path, index_col=0).reset_index(drop=True)
@@ -40,9 +40,10 @@ class Saving:
         except FileNotFoundError:
             self.full_df = self.detail_df
     
-    def set_accounting_table_path(self, accounting_table_path=None) -> None:
+    def set_accounting_table_path(self, accounting_table_path: str=None) -> None:
         """
-        Задает путь к таблице для сохранения деталей.
+        Задает путь к таблице с расчетами. Если в функцию не передается аргумент с
+        путем к таблице, задает путь по умолчанию.
         """
         if accounting_table_path is None:
             accounting_table_path = DEFAULT_ACCOUNTS_TABLE
@@ -51,7 +52,7 @@ class Saving:
         
     def save_accounts(self, detail: object) -> None:
         """
-        Запускает создание таблицы и сохраняет ее в таблицу с деталями.
+        Запускает обновление таблицы расчетов и сохраняет ее.
         """
         self._create_detail_df(detail)
         self._add_detail_to_accounts()
@@ -63,7 +64,7 @@ class Saving:
         
     def create_doc_to_print(self, detail: object, file_path: str) -> None:
         """
-        Создает файл с таблицей по текущей детали для печати.
+        Создает файл с текущим расчетом для печати.
         """
         if self.detail_df is None:
             self._create_detail_df(detail)

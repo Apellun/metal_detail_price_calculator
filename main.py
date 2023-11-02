@@ -4,12 +4,15 @@ from table_reader import TableReader
 from saving import Saving
 
 def create_app():
+    """
+    Инициализирует объекты классов и собирает из них приложение.
+    """
     table_reader = TableReader()
     saving = Saving()
     manager = Manager(table_reader, saving)
-    interface = Interface(manager)
-    return interface
+    app = Interface(manager)
+    return app
     
 if __name__ == "__main__":
-    interface = create_app()
-    interface.run()
+    app = create_app()
+    app.run()
