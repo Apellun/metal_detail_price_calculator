@@ -22,7 +22,6 @@ class Interface:
             self.main_layout,
             default_element_size=[10],
             element_padding=10,
-            font=(60),
             finalize=True
             )
     
@@ -45,7 +44,7 @@ class Interface:
             text,
             modal=True,
             title=title,
-            font=(90)
+            font=(60)
             ) 
           
     def settings(self) -> None:
@@ -65,8 +64,7 @@ class Interface:
             settings_layout,
             modal=True,
             default_element_size=[10],
-            element_padding=10,
-            font=(60)
+            element_padding=10
             )
         while True:
             event, values = settings_window.read()
@@ -110,7 +108,7 @@ class Interface:
         except Exception as e:
             self.exception_popup(e)  
     
-    def overvrite_file_window(self, values: dict) -> None:
+    def overwrite_file_window(self, values: dict) -> None:
         """
         Окно, которое возникает если пользователь перезаписывает существующий файл.
         Позволяет продолжить или отменить действие.
@@ -121,8 +119,7 @@ class Interface:
         ]
         window = sg.Window(
             "Подтвердите действие",
-            layout,
-            font=(90)
+            layout
         )
         while True:
             event, _ = window.read()
@@ -147,8 +144,7 @@ class Interface:
         "Сохранить для печати",
             save_doc_to_print_layout,
             default_element_size=[10],
-            element_padding=10,
-            font=(60)
+            element_padding=10
         )
         while True:
             event, values = save_doc_to_print_window.read(timeout=1000)
@@ -162,7 +158,7 @@ class Interface:
                     self.manager.save_doc_to_print(values)
                     self.success_popup("Файл сохранен")
                 except FileExistsError:
-                    self.overvrite_file_window(values)
+                    self.overwrite_file_window(values)
                 except Exception as e:
                     self.exception_popup(e)   
         save_doc_to_print_window.close()
