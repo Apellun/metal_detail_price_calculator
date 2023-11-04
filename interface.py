@@ -31,8 +31,7 @@ class Interface:
         sg.popup_no_buttons(
                         exception,
                         modal=True,
-                        title="Ошибка!",
-                        font=(90)
+                        title="Ошибка!"
                     )
       
     def success_popup(self, text: str, title: str="Успех") -> None:
@@ -42,8 +41,7 @@ class Interface:
         sg.popup_no_buttons(
             text,
             modal=True,
-            title=title,
-            font=(60)
+            title=title
             ) 
           
     def settings(self) -> None:
