@@ -1,57 +1,62 @@
 import os
-from detail import Detail
+from calculation import Calculation
 from table_reader import TableReader
 from saving import Saving
+from const import metal_density_dict
         
 class Manager:
     def __init__(self, table_reader: TableReader, saving: Saving):
         self.table_reader = table_reader
         self.saving = saving
-        self.detail = None
+        self.calculation = None
     
     def _create_dict(self, values: dict) -> dict:
         """
-        Собирает словарь из собранных в интерфейсе данных
-        для создания детали.
+        Собирает словарь для создания расчета.
         """
         return {
             'blueprint_name': values['Название чертежа'],
             'metal_category': values['Категория металла'],
             'metal_type': values['Тип металла'],
-            'metal_thickness': float(values["Толщина металла"]),
-            'metal_area': float(values["Площадь металла"]),
-            'cutting': float(values["Резка, м. п."]),
-            'in_cutting_amount': int(values["Врезка, количество"]),
-            'details_amount': int(values["Количество деталей"]),
-            'complects_amount': int(values["Количество комплектов"])
+            'metal_thickness': values["Толщина металла"],
+            'metal_area': values["Площадь металла"],
+            'metal_price': self.table_reader.get_metal_price(values['Тип металла']),
+            'cutting': values["Резка, м. п."],
+            'in_cutting_amount': values["Врезка, количество"],
+            'cutting_price': self.table_reader.get_cutting_price(values['Категория металла'], values["Толщина металла"], values["Количество деталей"]),
+            'in_cutting_price': self.table_reader.get_in_cutting_price(values['Категория металла'], values["Толщина металла"]),
+            'details_amount': values["Количество деталей"],
+            'complects_amount': values["Количество комплектов"],
+            'density': metal_density_dict[values['Категория металла']]
         }
-
-    def _create_prices_str(self, detail: Detail) -> str:
+    
+    def _validate_fields_not_empty(self, values: dict):
         """
-        Создает строку для вывода стоимости работ.
+        Проверяет, что переданные поля не пустые.
         """
-        return (f"Стоимость металла для детали: {detail.detail_price}\n"
-                f"Цена резки и врезки: {detail.full_cutting_price}\n"
-                f"Цена одного комплекта деталей: {detail.complect_price}\n"
-                f"Полная цена: {detail.final_price}")
-        
-    def _validate_fields_not_empty(self, values: dict) -> None:
-        """
-        Проверяет, что поля не пустые.
-        """    
         for index in values:
-            value = values[index].strip()
+            value = values[index]
             if value == "":
                 raise ValueError(f"{index}: поле не может быть пустым.")
-    
-    def _validate_fields_numeric(self, values: dict) -> None:
+        
+    def _validate_calculation_fields(self, values: dict) -> dict:
         """
-        Проверяет, что в нужных полях указаны числовые значения.
+        Проверяет, что переданные поля не пустые, в нужных полях
+        указаны числовые значения правильного числового типа, перезаполняет
+        словарь.
         """
         for index in values:
-            value = values[index].strip()
-            if index not in ["Название чертежа", "Категория металла", "Тип металла"] and not value.isdigit():
-                raise ValueError(f"{index}: введите числовое значение.")
+            value = values[index]
+            if value == "":
+                raise ValueError(f"{index}: поле не может быть пустым.")
+            try:
+                if index in ("Площадь металла", "Резка, м. п."):
+                        values[index] = float(value.replace(',', '.'))
+                elif index in ("Врезка, количество", "Количество деталей", "Количество комплектов"):
+                        values[index] = int(value)
+            except Exception as e:
+                raise ValueError(f"{index}: недопустимое значение.\n{e}")
+        return values
     
     def _validate_table_path(self, table_path: str) -> None:
         """
@@ -60,7 +65,7 @@ class Manager:
         """
         if table_path is not None and table_path != "":
             if not table_path.endswith((".xls", ".xlsx")):
-                raise Exception('Пожалуйста, убедитесь что выбраны таблицы формата excel (".xls", ".xlsx")')
+                raise Exception('Пожалуйста, убедитесь что выбраны таблицы формата excel (".xls", ".xlsx").')
         
     def _check_path_if_exists(self, file_path: str) -> None:
         """
@@ -68,19 +73,6 @@ class Manager:
         """
         if os.path.exists(file_path):
             raise FileExistsError
-            
-    def _create_detail(self, values: dict) -> Detail:
-        """
-        Создает деталь, заполняет поля детали значениями
-        из таблиц и расчетами, возвращает созданную деталь.
-        """
-        data = self._create_dict(values)
-        self.detail = Detail(**data)
-        self.detail.metal_price = self.table_reader.get_metal_price(self.detail.metal_type)
-        self.detail.cutting_price = self.table_reader.get_cutting_price(self.detail.metal_category, self.detail.metal_thickness, self.detail.details_amount)
-        self.detail.in_cutting_price = self.table_reader.get_in_cutting_price(self.detail.metal_thickness)
-        self.detail.set_prices()
-        return self.detail
     
     def get_metals_list(self) -> list:
         """
@@ -95,30 +87,38 @@ class Manager:
         """
         return self.table_reader.metal_prices_table_path, self.saving.accounting_table_path
     
-    def save_settings(self, metals_table_path: str=None, accounting_table_path: str=None) -> None:
+    def save_settings(self, metals_table_path: str=None, calculationing_table_path: str=None) -> None:
         """
-        Сохраняет настройки таблиц с металлами и расчетами.
+        Сохраняет заданные пути таблиц с металлами и расчетами.
         """
         self._validate_table_path(metals_table_path)
-        self._validate_table_path(accounting_table_path)
+        self._validate_table_path(calculationing_table_path)
         self.table_reader.set_metal_prices_table(metals_table_path)
-        self.saving.set_accounting_table_path(accounting_table_path)
+        self.saving.set_accounting_table_path(calculationing_table_path)
         
-    def count_prices(self, values: dict) -> str:
+    def create_calculation(self, values: dict) -> str:
         """
-        Запускает проверку значений полей и затем создание детали,
-        возвращает строку с расчетом цен.
+        Запускает проверку значений полей и затем создание расчета.
         """
-        self._validate_fields_not_empty(values)
-        self._validate_fields_numeric(values)
-        self._create_detail(values)
-        return self._create_prices_str(self.detail)
+        values_validated = self._validate_calculation_fields(values)
+        data = self._create_dict(values_validated)
+        self.calculation = Calculation(**data)
     
-    def save_accounts(self) -> None:
+    def create_prices_message(self) -> str:
+        """
+        Создает строку для вывода стоимости работ.
+        """
+        return (f"Стоимость металла для детали: {self.calculation.detail_price}\n"
+                f"Цена резки и врезки: {self.calculation.full_cutting_price}\n"
+                f"Цена одного комплекта деталей: {self.calculation.complect_price}\n"
+                f"Полная цена: {self.calculation.final_price}\n"
+                f"Масса детали: {self.calculation.mass}")
+    
+    def save_calculations(self) -> None:
         """
         Запускает сохранение расчета в таблицу с расчетами.
         """
-        self.saving.save_accounts(self.detail)
+        self.saving.save_calculations(self.calculation)
     
     def save_doc_to_print(self, values: dict) -> None:
         """
@@ -129,11 +129,11 @@ class Manager:
         self._validate_fields_not_empty(values)
         saving_path = f"{values['Папка']}/{values['Имя']}.xlsx"
         self._check_path_if_exists(saving_path)
-        self.saving.create_doc_to_print(self.detail, saving_path)
+        self.saving.create_doc_to_print(self.calculation, saving_path)
         
     def overvrite_file(self, values: dict) -> None:
         """
         Запускает сохранение файла вместо существующего.
         """
         saving_path = f"{values['Папка']}/{values['Имя']}.xlsx"
-        self.saving.create_doc_to_print(self.detail, saving_path)
+        self.saving.create_doc_to_print(self.calculation, saving_path)

@@ -1,5 +1,5 @@
 import PySimpleGUI as sg
-from const import metal_categories_list
+from const import metal_categories_list, metal_thickness_list
 
 class Interface:
     def __init__(self, manager: object):
@@ -9,20 +9,19 @@ class Interface:
             [sg.Button('Настройки')],
             [sg.Text('Название чертежа:'), sg.InputText(size=[50, 1], key="Название чертежа")],
             [sg.Text('Металл:'), sg.InputCombo(metal_categories_list, key="Категория металла", readonly=True), sg.InputCombo(self.metals_list, key="Тип металла", readonly=True)],
-            [sg.Text('Толщина металла:'), sg.InputText(key="Толщина металла")],
-            [sg.Text('Площадь металла:'), sg.InputText(key="Площадь металла")],
-            [sg.Text('Резка, м. п.:'), sg.InputText(key="Резка, м. п.")],
-            [sg.Text('Врезка, количество:'), sg.InputText(key="Врезка, количество")],
-            [sg.Text('Количество деталей:'), sg.InputText(key="Количество деталей")],
-            [sg.Text('Количество комплектов:'), sg.InputText(key="Количество комплектов")],
-            [sg.Button('Создать деталь и рассчитать стоимость'), sg.Button('Сохранить расчет'), sg.Button('Сохранить файл для печати')],
+            [sg.Text('Толщина металла:'), sg.InputCombo(metal_thickness_list, key="Толщина металла", readonly=True)],
+            [sg.Text('Площадь металла:'), sg.InputText(key="Площадь металла", default_text="1")],
+            [sg.Text('Резка, м. п.:'), sg.InputText(key="Резка, м. п.", default_text="1")],
+            [sg.Text('Врезка, количество:'), sg.InputText(key="Врезка, количество", default_text="1")],
+            [sg.Text('Количество деталей:'), sg.InputText(key="Количество деталей", default_text="1")],
+            [sg.Text('Количество комплектов:'), sg.InputText(key="Количество комплектов", default_text="1")],
+            [sg.Column([[sg.Button('Показать стоимость'), sg.Button('Сохранить расчет'), sg.Button('Сохранить файл для печати')]], justification='center')],
         ]
         self.main_window = sg.Window(
             "Расчет стоимости резки и гибки",
             self.main_layout,
             default_element_size=[10],
-            element_padding=10,
-            finalize=True
+            element_padding=10
             )
     
     def exception_popup(self, exception: str) -> None:
@@ -50,7 +49,7 @@ class Interface:
     def settings(self) -> None:
         """
         Окно настроек, позволяет загрузить другую таблицу с ценами металлов,
-        выбрать другую таблицу для созранения деталей, а также откатить эти
+        выбрать другую таблицу для сохранения расчетов, а также откатить эти
         изменения к настройкам по умолчанию.
         """
         metal_prices_table_path, accounting_table_path = self.manager.get_file_paths()
@@ -86,24 +85,23 @@ class Interface:
                 self.success_popup("Установлены настройки по умолчанию.")
         settings_window.close()
         
-    def count_prices(self, values: dict) -> None:
+    def show_prices(self) -> None:
         """
-        Запускает создание детали и подсчет цен, показывает
-        попап со стоимостью работ.
+        Показывает попап со стоимостью работ.
         """
         try:
-            prices = self.manager.count_prices(values)
-            self.success_popup(prices, "Стоимость")
+            prices_message = self.manager.create_prices_message()
+            self.success_popup(prices_message, "Стоимость")
         except Exception as e:
             self.exception_popup(e)
         
-    def save_accounts(self) -> None:
+    def save_calculations(self) -> None:
         """
         Сохраняет информацию о расчете в таблицу
-        и выводит попа успеха.
+        с расчетами и выводит попап успеха.
         """
         try:
-            self.manager.save_accounts()
+            self.manager.save_calculations()
             self.success_popup("Расчет сохранен")
         except Exception as e:
             self.exception_popup(e)  
@@ -133,8 +131,8 @@ class Interface:
     def save_to_print(self) -> None:
         """
         Окно сохранения документа с данными только о текущем
-        расчете для печати. Позволяет выбрать имя файла и папку,
-        в которой сохранить файл.
+        расчете для печати. Сохраняет расчет в выбранной
+        попке с заданным именем файла.
         """
         save_doc_to_print_layout = [
         [sg.Text('Введите имя:'), sg.InputText(size=[10, 1], key='Имя', enable_events=True), sg.InputText("Папка для сохранения", key='Папка', size=[30, 1]), sg.FolderBrowse("Выбрать папку")],
@@ -165,21 +163,26 @@ class Interface:
         
     def run(self) -> None:
         """
-        Главное окно.
+        Главное окно интерфейса. Создает расчет при
+        нажатии на кнопки 'Показать стоимость',
+        'Сохранить расчет', 'Сохранить файл для печати'.
         """
-        try:
-            while True:
+        
+        while True:
+            try:
                 event, values = self.main_window.read()
                 if event == sg.WIN_CLOSED:
                     break
-                elif event == 'Создать деталь и рассчитать стоимость':
-                    self.count_prices(values)    
-                elif event == 'Сохранить расчет':
-                    self.save_accounts()
-                elif event == 'Сохранить файл для печати':
-                    self.save_to_print()
                 elif event == 'Настройки':
                     self.settings()
-            self.main_window.close()
-        except Exception as e:
-            self.exception_popup(e)
+                else:
+                    self.manager.create_calculation(values)
+                    if event == 'Показать стоимость':
+                        self.show_prices()    
+                    if event == 'Сохранить расчет':
+                        self.save_calculations()
+                    if event == 'Сохранить файл для печати':
+                        self.save_to_print()
+            except Exception as e:
+                self.exception_popup(e)    
+        self.main_window.close()

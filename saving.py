@@ -4,41 +4,47 @@ from const import DEFAULT_ACCOUNTS_TABLE
 class Saving:
     def __init__(self):
         self.accounting_table_path = DEFAULT_ACCOUNTS_TABLE
-        self._detail_dict = None
-        self.detail_df = None
-        self.full_df = None
+        self._calculation_dict = None
+        self.calculation_df = None
+        self._accounts_df = None
         
-    def _create_detail_df(self, detail) -> None:
+    def _create_calculation_df(self, calculation) -> None:
         """
-        Создает из полей детали таблицу.
+        Создает из полей расчета таблицу.
         """
         dict = {
-        'Название чертежа': detail.blueprint_name,
-        'Материал': detail.metal_category,
-        'Толщина детали': detail.metal_thickness,
-        'Площадь детали': detail.metal_area,
-        'Цена детали': detail.detail_price,
-        'Резка, м.п': detail.cutting,
-        'Врезка, количество': detail.in_cutting_amount,
-        'Цена врезки': detail.full_in_cutting_price,
-        'Цена, рез+врезка': detail.full_cutting_price,
-        'Количетво деталей': detail.details_amount,
-        'Стоимость деталей': detail.complect_price,
-        'Количетво комплектов': detail.complects_amount,
-        'Стоимость комплектов': detail.final_price
+        'Название чертежа': calculation.blueprint_name,
+        'Материал': calculation.metal_category,
+        'Толщина детали': calculation.metal_thickness,
+        'Площадь детали': calculation.metal_area,
+        'Масса детали': calculation.mass,
+        'Цена детали': calculation.detail_price,
+        'Резка, м.п': calculation.cutting,
+        'Врезка, количество': calculation.in_cutting_amount,
+        'Цена врезки': calculation.full_in_cutting_price,
+        'Цена, рез+врезка': calculation.full_cutting_price,
+        'Количетво деталей': calculation.details_amount,
+        'Стоимость деталей': calculation.complect_price,
+        'Количетво комплектов': calculation.complects_amount,
+        'Стоимость комплектов': calculation.final_price
         }
-        self.detail_df = pd.DataFrame(dict, index=[0]).reset_index(drop=True)
+        self.calculation_df = pd.DataFrame(dict, index=[0])
         
-    def _add_detail_to_accounts(self) -> None:
+    def _add_calculation_to_accounts(self) -> None:
         """
         Объединяет таблицу с расчетами и новый расчет.
         """
         try:
-            accounts_df = pd.read_excel(self.accounting_table_path, index_col=0).reset_index(drop=True)
-            self.full_df = pd.concat([accounts_df, self.detail_df]).reset_index(drop=True)
-            self.full_df.index = self.full_df.index + 1
+            accounts_df = pd.read_excel(self.accounting_table_path, index_col=0)
+            self._accounts_df = pd.concat([accounts_df, self.calculation_df]).reset_index(drop=True)
+            self._accounts_df.index = self._accounts_df.index + 1
         except FileNotFoundError:
-            self.full_df = self.detail_df
+            self._accounts_df = self.calculation_df
+        except Exception as e:
+            raise Exception(f"Ошибка сохранения.\n{e}")
+    
+    def _set_accounting_table_path(self, accounting_table_path: str) -> None:
+        self.accounting_table_path = accounting_table_path
     
     def set_accounting_table_path(self, accounting_table_path: str=None) -> None:
         """
@@ -48,25 +54,29 @@ class Saving:
         if accounting_table_path is None:
             accounting_table_path = DEFAULT_ACCOUNTS_TABLE
         if accounting_table_path != "":
-            self.accounting_table_path = accounting_table_path
+            self._set_accounting_table_path(accounting_table_path)
         
-    def save_accounts(self, detail: object) -> None:
+    def save_calculations(self, calculation: object) -> None:
         """
-        Запускает обновление таблицы расчетов и сохраняет ее.
+        Добавляет расчет к таблице расчетов и сохраняет.
         """
-        self._create_detail_df(detail)
-        self._add_detail_to_accounts()
+        self._create_calculation_df(calculation)
+        self._add_calculation_to_accounts()
         try:
-            self.full_df.to_excel(self.accounting_table_path)
+            self._accounts_df.to_excel(self.accounting_table_path)
         except FileNotFoundError:
             with open(self.accounting_table_path, 'w', encoding='utf-8'):
-                self.full_df.to_excel(self.accounting_table_path)
+                self._accounts_df.to_excel(self.accounting_table_path)
+        except Exception as e:
+            raise Exception(f"Ошибка сохранения.\n{e}")        
         
-    def create_doc_to_print(self, detail: object, file_path: str) -> None:
+    def create_doc_to_print(self, calculation: object, file_path: str) -> None:
         """
         Создает файл с текущим расчетом для печати.
         """
-        if self.detail_df is None:
-            self._create_detail_df(detail)
-        with open(file_path, 'w', encoding='utf-8'):
-            self.detail_df.to_excel(file_path)
+        self._create_calculation_df(calculation)
+        try:
+            with open(file_path, 'w', encoding='utf-8'):
+                self.calculation_df.to_excel(file_path)
+        except Exception as e:
+            raise Exception(f"Ошибка сохранения.\n{e}")
