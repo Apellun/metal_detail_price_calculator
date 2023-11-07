@@ -67,7 +67,7 @@ class TableReader:
         except Exception as e:
             raise Exception(f'Цена резки для введенных толщины и категории металла не обнаружена.\n{e}')
         
-    def get_in_cutting_price(self, metal_category: str, metal_thickness: float) -> float:
+    def get_inset_price(self, metal_category: str, metal_thickness: float) -> float:
         """
         Возвращает из таблицы стоимость врезки.
         """

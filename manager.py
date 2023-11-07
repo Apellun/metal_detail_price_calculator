@@ -22,9 +22,9 @@ class Manager:
             'metal_area': values["Площадь металла"],
             'metal_price': self.table_reader.get_metal_price(values['Тип металла']),
             'cutting': values["Резка, м. п."],
-            'in_cutting_amount': values["Врезка, количество"],
+            'inset_amount': values["Врезка, количество"],
             'cutting_price': self.table_reader.get_cutting_price(values['Категория металла'], values["Толщина металла"], values["Количество деталей"]),
-            'in_cutting_price': self.table_reader.get_in_cutting_price(values['Категория металла'], values["Толщина металла"]),
+            'inset_price': self.table_reader.get_inset_price(values['Категория металла'], values["Толщина металла"]),
             'details_amount': values["Количество деталей"],
             'complects_amount': values["Количество комплектов"],
             'density': metal_density_dict[values['Категория металла']]

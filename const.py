@@ -7,5 +7,5 @@ DEFAULT_PRICES_TABLE_PATH = BASE_DIR_STR / 'detail_making_costs.xlsx'
 DEFAULT_ACCOUNTS_TABLE = BASE_DIR_STR / 'accounts.xlsx'
 
 metal_thickness_list = [0.5, 1, 1.5, 2, 3, 4, 5, 6, 8, 10, 12, 14, 16, 20]
-metal_density_dict = {"ст3": 7800, "нерж": 2700, "алюминий": 7840}
+metal_density_dict = {"ст3": 7.800, "нерж": 2.700, "алюминий": 7.840}
 metal_categories_list = list(metal_density_dict.keys())
