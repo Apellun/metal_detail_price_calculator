@@ -1,9 +1,10 @@
 import PySimpleGUI as sg
 from const import metal_categories_list, metal_thickness_list
+from manager import Manager
 
 class Interface:
-    def __init__(self, manager: object):
-        self.manager = manager
+    def __init__(self):
+        self.manager = Manager()
         self.metals_list = self.manager.get_metals_list()
         self.main_layout = [
             [sg.Button('Настройки')],

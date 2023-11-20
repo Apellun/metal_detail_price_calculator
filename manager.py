@@ -5,9 +5,9 @@ from saving import Saving
 from const import metal_density_dict
         
 class Manager:
-    def __init__(self, table_reader: TableReader, saving: Saving):
-        self.table_reader = table_reader
-        self.saving = saving
+    def __init__(self):
+        self.table_reader = TableReader()
+        self.saving = Saving()
         self.calculation = None
     
     def _create_dict(self, values: dict) -> dict:
@@ -112,7 +112,7 @@ class Manager:
                 f"Цена резки и врезки: {self.calculation.full_cutting_price}\n"
                 f"Цена одного комплекта деталей: {self.calculation.complect_price}\n"
                 f"Полная цена: {self.calculation.final_price}\n"
-                f"Масса детали: {self.calculation.mass}")
+                f"Масса детали: {self.calculation.mass} кг")
     
     def save_calculations(self) -> None:
         """
