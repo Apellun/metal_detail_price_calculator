@@ -53,8 +53,8 @@ class Interface:
         """
         metal_prices_table_path, accounting_table_path = self.manager.get_file_paths()
         settings_layout =[
-            [sg.Text('Таблица со стоимостью металлов:'), sg.sg.InputText(metal_prices_table_path, size=(40,3), key='Путь к таблице металлов'), sg.FileBrowse("Выбрать другой", file_types=(("Excel files", "*.xlsx"), ("Excel files", "*.xls")), key="Таблица металлов")],
-            [sg.Text('Таблица для сохранения рассчетов:'), sg.sg.InputText(accounting_table_path, size=(40,3), key='Путь к таблице с рассчетами'), sg.FileBrowse("Выбрать другой", file_types=(("Excel files", "*.xlsx"), ("Excel files", "*.xls")), key="Таблица рассчетов")],
+            [sg.Text('Таблица со стоимостью металлов:'), sg.InputText(metal_prices_table_path, size=(40,3), key='Путь к таблице металлов'), sg.FileBrowse("Выбрать другой", file_types=(("Excel files", "*.xlsx"), ("Excel files", "*.xls")), key="Таблица металлов")],
+            [sg.Text('Таблица для сохранения рассчетов:'), sg.InputText(accounting_table_path, size=(40,3), key='Путь к таблице с рассчетами'), sg.FileBrowse("Выбрать другой", file_types=(("Excel files", "*.xlsx"), ("Excel files", "*.xls")), key="Таблица рассчетов")],
             [sg.Button('Сохранить'), sg.Button('По умолчанию')]           
             ]
         settings_window = sg.Window(
