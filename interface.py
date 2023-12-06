@@ -136,6 +136,7 @@ class Interface:
                 try:
                     self.manager.save_doc_to_print(values)
                     self.success_popup("Файл сохранен")
+                    break
                 except FileExistsError:
                     self.overwrite_file_window(values)
                 except Exception as e:
@@ -188,7 +189,7 @@ class Interface:
         
     def start(self) -> None:
         choose_spreadsheet_layout = [
-            [sg.Text('Таблица со стоимостями металлов по умолчанию не найдена, выберите другую.'), sg.FileBrowse("Выбрать", file_types=(("Excel files", "*.xlsx"), ("Excel files", "*.xls")), key="Таблица металлов")],
+            [sg.Text('Таблица со стоимостями металлов по умолчанию не найдена, выберите другую.', size=(40, 2)), sg.FileBrowse("Выбрать", file_types=(("Excel files", "*.xlsx"), ("Excel files", "*.xls")), key="Таблица металлов")],
             [sg.Button('Сохранить')]    
         ]
         choose_spreadsheet_window = sg.Window(
@@ -209,5 +210,5 @@ class Interface:
                     self.manager.save_settings(metals_table_path=values['Таблица металлов'])
                     self.metals_list = self.manager.get_metals_list()
                     self.success_popup("Таблица установлена")
+                    choose_spreadsheet_window.close()
                     self.main()
-                    break
