@@ -1,5 +1,6 @@
 from interface import Interface
+from container import manager
     
 if __name__ == "__main__":
-    interface = Interface()
-    interface.run()
+    interface = Interface(manager)
+    interface.main()

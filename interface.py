@@ -1,29 +1,10 @@
 import PySimpleGUI as sg
 from const import metal_categories_list, metal_thickness_list
-from manager import Manager
 
 class Interface:
-    def __init__(self):
-        self.manager = Manager()
-        self.metals_list = self.manager.get_metals_list()
-        self.main_layout = [
-            [sg.Button('Настройки')],
-            [sg.Text('Название чертежа:'), sg.InputText(size=[50, 1], key="Название чертежа")],
-            [sg.Text('Металл:'), sg.InputCombo(metal_categories_list, key="Категория металла", readonly=True), sg.InputCombo(self.metals_list, key="Тип металла", readonly=True)],
-            [sg.Text('Толщина металла:'), sg.InputCombo(metal_thickness_list, key="Толщина металла", readonly=True)],
-            [sg.Text('Площадь металла:'), sg.InputText(key="Площадь металла", default_text="1")],
-            [sg.Text('Резка, м. п.:'), sg.InputText(key="Резка, м. п.", default_text="1")],
-            [sg.Text('Врезка, количество:'), sg.InputText(key="Врезка, количество", default_text="1")],
-            [sg.Text('Количество деталей:'), sg.InputText(key="Количество деталей", default_text="1")],
-            [sg.Text('Количество комплектов:'), sg.InputText(key="Количество комплектов", default_text="1")],
-            [sg.Column([[sg.Button('Показать стоимость'), sg.Button('Сохранить расчет'), sg.Button('Сохранить файл для печати')]], justification='center')],
-        ]
-        self.main_window = sg.Window(
-            "Расчет стоимости резки и гибки",
-            self.main_layout,
-            default_element_size=[10],
-            element_padding=10
-            )
+    def __init__(self, manager):
+        self.manager = manager
+        self.metals_list = None
     
     def exception_popup(self, exception: str) -> None:
         """
@@ -44,7 +25,7 @@ class Interface:
             modal=True,
             title=title
             ) 
-          
+                
     def settings(self) -> None:
         """
         Окно настроек, позволяет загрузить другую таблицу с ценами металлов,
@@ -52,7 +33,7 @@ class Interface:
         изменения к настройкам по умолчанию.
         """
         metal_prices_table_path, accounting_table_path = self.manager.get_file_paths()
-        settings_layout =[
+        settings_layout = [
             [sg.Text('Таблица со стоимостью металлов:'), sg.InputText(metal_prices_table_path, size=(40,3), key='Путь к таблице металлов'), sg.FileBrowse("Выбрать другой", file_types=(("Excel files", "*.xlsx"), ("Excel files", "*.xls")), key="Таблица металлов")],
             [sg.Text('Таблица для сохранения рассчетов:'), sg.InputText(accounting_table_path, size=(40,3), key='Путь к таблице с рассчетами'), sg.FileBrowse("Выбрать другой", file_types=(("Excel files", "*.xlsx"), ("Excel files", "*.xls")), key="Таблица рассчетов")],
             [sg.Button('Сохранить'), sg.Button('По умолчанию')]           
@@ -160,16 +141,33 @@ class Interface:
                     self.exception_popup(e)   
         save_doc_to_print_window.close()
         
-    def run(self) -> None:
+    def main(self) -> None:
         """
         Главное окно интерфейса. Создает расчет при
         нажатии на кнопки 'Показать стоимость',
         'Сохранить расчет', 'Сохранить файл для печати'.
         """
-        
+        main_layout = [
+            [sg.Button('Настройки')],
+            [sg.Text('Название чертежа:'), sg.InputText(size=[50, 1], key="Название чертежа")],
+            [sg.Text('Металл:'), sg.InputCombo(metal_categories_list, key="Категория металла", readonly=True), sg.InputCombo(self.metals_list, key="Тип металла", readonly=True)],
+            [sg.Text('Толщина металла:'), sg.InputCombo(metal_thickness_list, key="Толщина металла", readonly=True)],
+            [sg.Text('Площадь металла:'), sg.InputText(key="Площадь металла", default_text="1")],
+            [sg.Text('Резка, м. п.:'), sg.InputText(key="Резка, м. п.", default_text="1")],
+            [sg.Text('Врезка, количество:'), sg.InputText(key="Врезка, количество", default_text="1")],
+            [sg.Text('Количество деталей:'), sg.InputText(key="Количество деталей", default_text="1")],
+            [sg.Text('Количество комплектов:'), sg.InputText(key="Количество комплектов", default_text="1")],
+            [sg.Column([[sg.Button('Показать стоимость'), sg.Button('Сохранить расчет'), sg.Button('Сохранить файл для печати')]], justification='center')],
+        ]
+        main_window = sg.Window(
+            "Расчет стоимости резки и гибки",
+            main_layout,
+            default_element_size=[10],
+            element_padding=10
+            )
         while True:
             try:
-                event, values = self.main_window.read()
+                event, values = main_window.read()
                 if event == sg.WIN_CLOSED:
                     break
                 elif event == 'Настройки':
@@ -183,5 +181,31 @@ class Interface:
                     if event == 'Сохранить файл для печати':
                         self.save_to_print()
             except Exception as e:
-                self.exception_popup(e)    
+                self.exception_popup(e)
         self.main_window.close()
+        
+    # def start(self) -> None:
+    #     choose_spreadsheet_layout = [
+    #         [sg.Text('Таблица со стоимостями металлов по умолчанию не найдена, выберите другую.'), sg.FileBrowse("Выбрать", file_types=(("Excel files", "*.xlsx"), ("Excel files", "*.xls")), key="Таблица металлов")],
+    #         [sg.Button('Сохранить')]    
+    #     ]
+    #     choose_spreadsheet_window = sg.Window(
+    #         "Выбор таблицы",
+    #         choose_spreadsheet_layout,
+    #         modal=True,
+    #         default_element_size=[10],
+    #         element_padding=10
+    #         )
+    #     while True:
+    #         try:
+    #             self.metals_list = self.manager.get_metals_list()
+    #         except:
+    #             event, values = choose_spreadsheet_window.read()
+    #             if event == sg.WIN_CLOSED:
+    #                 break
+    #             elif event == "Сохранить":
+    #                 self.manager.save_settings(metals_table_path=values['Таблица металлов'])
+    #                 self.metals_list = self.manager.get_metals_list()
+    #                 self.success_popup("Таблица установлена")
+    #                 self.main()
+    #                 break

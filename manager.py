@@ -1,13 +1,11 @@
 import os
 from calculation import Calculation
-from table_reader import TableReader
-from saving import Saving
 from const import metal_density_dict
         
 class Manager:
-    def __init__(self):
-        self.table_reader = TableReader()
-        self.saving = Saving()
+    def __init__(self, table_reader, saving):
+        self.table_reader = table_reader
+        self.saving = saving
         self.calculation = None
     
     def _create_dict(self, values: dict) -> dict:
