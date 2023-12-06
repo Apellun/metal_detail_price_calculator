@@ -45,8 +45,10 @@ class Manager:
         """
         for index in values:
             value = values[index]
+            
             if value == "":
                 raise ValueError(f"{index}: поле не может быть пустым.")
+            
             try:
                 if index in ("Площадь металла", "Резка, м. п."):
                         values[index] = float(value.replace(',', '.'))
@@ -54,6 +56,7 @@ class Manager:
                         values[index] = int(value)
             except Exception as e:
                 raise ValueError(f"{index}: недопустимое значение.\n{e}")
+        
         return values
     
     def _validate_table_path(self, table_path: str) -> None:

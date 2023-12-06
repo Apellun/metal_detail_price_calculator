@@ -22,10 +22,10 @@ class Interface:
         Попап успеха.
         """
         sg.popup_no_buttons(
-            text,
-            modal=True,
-            title=title
-            ) 
+                    text,
+                    modal=True,
+                    title=title
+                    ) 
                 
     def settings(self) -> None:
         """
@@ -34,11 +34,13 @@ class Interface:
         изменения к настройкам по умолчанию.
         """
         metal_prices_table_path, accounting_table_path = self.manager.get_file_paths()
+        
         settings_layout = [
             [sg.Text('Таблица со стоимостью металлов:'), sg.InputText(metal_prices_table_path, size=(40,3), key='Путь к таблице металлов'), sg.FileBrowse("Выбрать другой", file_types=(("Excel files", "*.xlsx"), ("Excel files", "*.xls")), key="Таблица металлов")],
             [sg.Text('Таблица для сохранения рассчетов:'), sg.InputText(accounting_table_path, size=(40,3), key='Путь к таблице с рассчетами'), sg.FileBrowse("Выбрать другой", file_types=(("Excel files", "*.xlsx"), ("Excel files", "*.xls")), key="Таблица рассчетов")],
             [sg.Button('Сохранить'), sg.Button('По умолчанию')]           
             ]
+        
         settings_window = sg.Window(
             "Настройки",
             settings_layout,
@@ -46,10 +48,13 @@ class Interface:
             default_element_size=[10],
             element_padding=10
             )
+        
         while True:
             event, values = settings_window.read()
+            
             if event == sg.WIN_CLOSED:
                 break
+            
             elif event == "Сохранить":
                 try:
                     self.manager.save_settings(values['Таблица металлов'], values['Таблица рассчетов'])
@@ -57,6 +62,7 @@ class Interface:
                     self.success_popup("Настройки обновлены.")
                 except Exception as e:
                     self.exception_popup(e)
+                    
             elif event == "По умолчанию":
                 self.manager.save_settings()
                 self.main_window['Тип металла'].update(values=self.manager.get_metals_list())
@@ -64,28 +70,23 @@ class Interface:
                 settings_window['Путь к таблице металлов'].update(metal_prices_table_path)
                 settings_window['Путь к таблице с рассчетами'].update(accounting_table_path)
                 self.success_popup("Установлены настройки по умолчанию.")
+                
         settings_window.close()
         
     def show_prices(self) -> None:
         """
         Показывает попап со стоимостью работ.
         """
-        try:
-            prices_message = self.manager.create_prices_message()
-            self.success_popup(prices_message, "Стоимость")
-        except Exception as e:
-            self.exception_popup(e)
+        prices_message = self.manager.create_prices_message()
+        self.success_popup(prices_message, "Стоимость")
         
     def save_calculations(self) -> None:
         """
         Сохраняет информацию о расчете в таблицу
         с расчетами и выводит попап успеха.
         """
-        try:
-            self.manager.save_calculations()
-            self.success_popup("Расчет сохранен")
-        except Exception as e:
-            self.exception_popup(e)  
+        self.manager.save_calculations()
+        self.success_popup("Расчет сохранен")
     
     def overwrite_file_window(self, values: dict) -> None:
         """
@@ -96,10 +97,12 @@ class Interface:
         [sg.Text("Файл с таким именем уже существует. Перезаписать?")],
         [sg.Button("OK"), sg.Button("Отмена")]
         ]
+        
         window = sg.Window(
             "Подтвердите действие",
             layout
         )
+        
         while True:
             event, _ = window.read()
             if event == sg.WINDOW_CLOSED or event == "Отмена":
@@ -107,6 +110,7 @@ class Interface:
             elif event == "OK":
                 self.manager.overvrite_file(values)
                 break
+            
         window.close()
         
     def save_to_print(self) -> None:
@@ -119,19 +123,20 @@ class Interface:
         [sg.Text('Введите имя:'), sg.InputText(size=[10, 1], key='Имя', enable_events=True), sg.InputText("Папка для сохранения", key='Папка', size=[30, 1]), sg.FolderBrowse("Выбрать папку")],
         [sg.Button('Сохранить')]
         ]
+        
         save_doc_to_print_window = sg.Window(
         "Сохранить для печати",
             save_doc_to_print_layout,
             default_element_size=[10],
             element_padding=10
         )
+        
         while True:
             event, values = save_doc_to_print_window.read(timeout=1000)
+            
             if event == sg.WIN_CLOSED:
                 break
-            elif event == 'Имя':
-                if values['Имя'] == 'Введите имя':
-                    save_doc_to_print_window['Имя'].update(default_text='')
+            
             elif event == "Сохранить":
                 try:
                     self.manager.save_doc_to_print(values)
@@ -141,6 +146,7 @@ class Interface:
                     self.overwrite_file_window(values)
                 except Exception as e:
                     self.exception_popup(e)   
+                    
         save_doc_to_print_window.close()
         
     def main(self) -> None:
@@ -148,6 +154,7 @@ class Interface:
         Главное окно интерфейса. Создает расчет при
         нажатии на кнопки 'Показать стоимость',
         'Сохранить расчет', 'Сохранить файл для печати'.
+        Открывает окна для остальных операций.
         """
         main_layout = [
             [sg.Button('Настройки')],
@@ -161,20 +168,26 @@ class Interface:
             [sg.Text('Количество комплектов:'), sg.InputText(key="Количество комплектов", default_text="1")],
             [sg.Column([[sg.Button('Показать стоимость'), sg.Button('Сохранить расчет'), sg.Button('Сохранить файл для печати')]], justification='center')],
         ]
-        window = sg.Window(
+        
+        main_window = sg.Window(
             "Расчет стоимости резки и гибки",
             main_layout,
             default_element_size=[10],
             element_padding=10
             )
-        self.main_window = window
+        
+        self.main_window = main_window
+        
         while True:
             try:
                 event, values = self.main_window.read()
+                
                 if event == sg.WIN_CLOSED:
                     break
+                
                 elif event == 'Настройки':
                     self.settings()
+                    
                 else:
                     self.manager.create_calculation(values)
                     if event == 'Показать стоимость':
@@ -183,15 +196,24 @@ class Interface:
                         self.save_calculations()
                     if event == 'Сохранить файл для печати':
                         self.save_to_print()
+                        
             except Exception as e:
                 self.exception_popup(e)
+                
         self.main_window.close()
         
     def start(self) -> None:
+        """
+        Проверяет наличие таблицы со стоимостями металлов
+        в папке с приложением. Если таблицы нет, предлагает
+        пользователю выбрать файл и после этого запускает основной
+        экран приложения.
+        """
         choose_spreadsheet_layout = [
             [sg.Text('Таблица со стоимостями металлов по умолчанию не найдена, выберите другую.', size=(40, 2)), sg.FileBrowse("Выбрать", file_types=(("Excel files", "*.xlsx"), ("Excel files", "*.xls")), key="Таблица металлов")],
             [sg.Button('Сохранить')]    
         ]
+        
         choose_spreadsheet_window = sg.Window(
             "Выбор таблицы",
             choose_spreadsheet_layout,
@@ -199,16 +221,24 @@ class Interface:
             default_element_size=[10],
             element_padding=10
             )
+        
         while True:
             try:
                 self.metals_list = self.manager.get_metals_list()
+                break
+                
             except:
                 event, values = choose_spreadsheet_window.read()
+                
                 if event == sg.WIN_CLOSED:
                     break
+                
                 elif event == "Сохранить":
                     self.manager.save_settings(metals_table_path=values['Таблица металлов'])
                     self.metals_list = self.manager.get_metals_list()
                     self.success_popup("Таблица установлена")
                     choose_spreadsheet_window.close()
-                    self.main()
+                    break
+                
+        self.main()
+        choose_spreadsheet_window.close()

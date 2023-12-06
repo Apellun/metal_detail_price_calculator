@@ -61,6 +61,7 @@ class TableReader:
         """
         if self.cutting_prices_df is None:
             self._set_cutting_prices_table(metal_category)
+            
         try:
             if details_amount <= 100:
                 return float(self.cutting_prices_df.loc[metal_thickness].iloc[0])
@@ -75,6 +76,7 @@ class TableReader:
         """
         if self.cutting_prices_df is None:
             self._set_cutting_prices_table(metal_category)
+            
         try:
             return float(self.cutting_prices_df.loc[metal_thickness].iloc[2])
         except Exception as e:

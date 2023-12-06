@@ -38,8 +38,10 @@ class Saving:
             accounts_df = pd.read_excel(self.accounting_table_path, index_col=0)
             self._accounts_df = pd.concat([accounts_df, self.calculation_df]).reset_index(drop=True)
             self._accounts_df.index = self._accounts_df.index + 1
+            
         except FileNotFoundError:
             self._accounts_df = self.calculation_df
+            
         except Exception as e:
             raise Exception(f"Ошибка сохранения.\n{e}")
     
@@ -62,11 +64,14 @@ class Saving:
         """
         self._create_calculation_df(calculation)
         self._add_calculation_to_accounts()
+        
         try:
             self._accounts_df.to_excel(self.accounting_table_path)
+            
         except FileNotFoundError:
             with open(self.accounting_table_path, 'w', encoding='utf-8'):
                 self._accounts_df.to_excel(self.accounting_table_path)
+                
         except Exception as e:
             raise Exception(f"Ошибка сохранения.\n{e}")        
         
@@ -75,6 +80,7 @@ class Saving:
         Создает файл с текущим расчетом для печати.
         """
         self._create_calculation_df(calculation)
+        
         try:
             with open(file_path, 'w', encoding='utf-8'):
                 self.calculation_df.to_excel(file_path)
