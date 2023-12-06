@@ -5,6 +5,7 @@ class Interface:
     def __init__(self, manager):
         self.manager = manager
         self.metals_list = None
+        self.main_window = None
     
     def exception_popup(self, exception: str) -> None:
         """
@@ -159,15 +160,16 @@ class Interface:
             [sg.Text('Количество комплектов:'), sg.InputText(key="Количество комплектов", default_text="1")],
             [sg.Column([[sg.Button('Показать стоимость'), sg.Button('Сохранить расчет'), sg.Button('Сохранить файл для печати')]], justification='center')],
         ]
-        main_window = sg.Window(
+        window = sg.Window(
             "Расчет стоимости резки и гибки",
             main_layout,
             default_element_size=[10],
             element_padding=10
             )
+        self.main_window = window
         while True:
             try:
-                event, values = main_window.read()
+                event, values = self.main_window.read()
                 if event == sg.WIN_CLOSED:
                     break
                 elif event == 'Настройки':
@@ -184,28 +186,28 @@ class Interface:
                 self.exception_popup(e)
         self.main_window.close()
         
-    # def start(self) -> None:
-    #     choose_spreadsheet_layout = [
-    #         [sg.Text('Таблица со стоимостями металлов по умолчанию не найдена, выберите другую.'), sg.FileBrowse("Выбрать", file_types=(("Excel files", "*.xlsx"), ("Excel files", "*.xls")), key="Таблица металлов")],
-    #         [sg.Button('Сохранить')]    
-    #     ]
-    #     choose_spreadsheet_window = sg.Window(
-    #         "Выбор таблицы",
-    #         choose_spreadsheet_layout,
-    #         modal=True,
-    #         default_element_size=[10],
-    #         element_padding=10
-    #         )
-    #     while True:
-    #         try:
-    #             self.metals_list = self.manager.get_metals_list()
-    #         except:
-    #             event, values = choose_spreadsheet_window.read()
-    #             if event == sg.WIN_CLOSED:
-    #                 break
-    #             elif event == "Сохранить":
-    #                 self.manager.save_settings(metals_table_path=values['Таблица металлов'])
-    #                 self.metals_list = self.manager.get_metals_list()
-    #                 self.success_popup("Таблица установлена")
-    #                 self.main()
-    #                 break
+    def start(self) -> None:
+        choose_spreadsheet_layout = [
+            [sg.Text('Таблица со стоимостями металлов по умолчанию не найдена, выберите другую.'), sg.FileBrowse("Выбрать", file_types=(("Excel files", "*.xlsx"), ("Excel files", "*.xls")), key="Таблица металлов")],
+            [sg.Button('Сохранить')]    
+        ]
+        choose_spreadsheet_window = sg.Window(
+            "Выбор таблицы",
+            choose_spreadsheet_layout,
+            modal=True,
+            default_element_size=[10],
+            element_padding=10
+            )
+        while True:
+            try:
+                self.metals_list = self.manager.get_metals_list()
+            except:
+                event, values = choose_spreadsheet_window.read()
+                if event == sg.WIN_CLOSED:
+                    break
+                elif event == "Сохранить":
+                    self.manager.save_settings(metals_table_path=values['Таблица металлов'])
+                    self.metals_list = self.manager.get_metals_list()
+                    self.success_popup("Таблица установлена")
+                    self.main()
+                    break

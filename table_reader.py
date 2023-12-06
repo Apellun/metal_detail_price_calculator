@@ -14,6 +14,8 @@ class TableReader:
         """
         try:
             self.metal_prices_df = pd.read_excel(metal_prices_table_path, sheet_name='стоимость металлов', index_col=0)
+            self.metal_prices_table_path = metal_prices_table_path
+            self._cutting_prices_table_path = metal_prices_table_path
         except Exception as e:
             raise Exception(f'Не удалось прочитать таблицу со стоимостями металлов.\n{e}')
         
