@@ -4,18 +4,19 @@ from const import DEFAULT_PRICES_TABLE_PATH
 class TableReader:
     def __init__(self):
         self.metal_prices_table_path = DEFAULT_PRICES_TABLE_PATH
-        self._cutting_prices_table_path = DEFAULT_PRICES_TABLE_PATH
+        self.cutting_prices_table_path = DEFAULT_PRICES_TABLE_PATH
         self.cutting_prices_df = None
         self.metal_prices_df = None
         
-    def _set_metal_prices_table(self, metal_prices_table_path: str) -> None:
+    def _set_metal_prices_table(self, metal_prices_table_path: str, save_for_all: bool = None) -> None:
         """
         Создает таблицу со стоимостью металлов.
         """
         try:
-            self.metal_prices_df = pd.read_excel(metal_prices_table_path, sheet_name='стоимость металлов', index_col=0)
             self.metal_prices_table_path = metal_prices_table_path
-            self._cutting_prices_table_path = metal_prices_table_path
+            self.metal_prices_df = pd.read_excel(metal_prices_table_path, sheet_name='стоимость металлов', index_col=0)
+            # if save_for_all:
+            #     self.cutting_prices_table_path = metal_prices_table_path
         except Exception as e:
             raise Exception(f'Не удалось прочитать таблицу со стоимостями металлов.\n{e}')
         
@@ -24,11 +25,11 @@ class TableReader:
         Создает таблицу со стоимостью резки и врезки.
         """
         try:
-            self.cutting_prices_df = pd.read_excel(self._cutting_prices_table_path, sheet_name=f'резка и врезка {metal_category}', index_col=0)
+            self.cutting_prices_df = pd.read_excel(self.cutting_prices_table_path, sheet_name=f'резка и врезка {metal_category}', index_col=0)
         except Exception as e:
                 raise Exception(f'Не удалось прочитать таблицу со стоимостями резки и врезки.\n{e}')
             
-    def set_metal_prices_table(self, metal_prices_table_path: str=None) -> None:
+    def set_metal_prices_table(self, metal_prices_table_path: str = None, save_for_all: bool = None) -> None:
         """
         Устанавливает путь к таблице со стоимостями металлов. Если
         аргумент с путем не передан, устанавливает путь по умолчанию.
@@ -36,7 +37,7 @@ class TableReader:
         if metal_prices_table_path is None:
             metal_prices_table_path = DEFAULT_PRICES_TABLE_PATH
         if metal_prices_table_path != "":
-            self._set_metal_prices_table(metal_prices_table_path)
+            self._set_metal_prices_table(metal_prices_table_path, save_for_all)
         
     def get_metals_list(self) -> list:
         """

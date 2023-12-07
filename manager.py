@@ -88,13 +88,13 @@ class Manager:
         """
         return self.table_reader.metal_prices_table_path, self.saving.accounting_table_path
     
-    def save_settings(self, metals_table_path: str=None, calculationing_table_path: str=None) -> None:
+    def save_settings(self, metals_table_path: str = None, calculationing_table_path: str = None, save_for_all: bool = None) -> None:
         """
         Сохраняет заданные пути таблиц с металлами и расчетами.
         """
         self._validate_table_path(metals_table_path)
         self._validate_table_path(calculationing_table_path)
-        self.table_reader.set_metal_prices_table(metals_table_path)
+        self.table_reader.set_metal_prices_table(metals_table_path, save_for_all)
         self.saving.set_accounting_table_path(calculationing_table_path)
         
     def create_calculation(self, values: dict) -> str:

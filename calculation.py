@@ -24,8 +24,8 @@ class Calculation:
     
     def __post_init__(self):
         self.mass = round((self.metal_thickness * self.metal_area * self.density), 4)
-        self.detail_price = round((self.metal_price * self.metal_area), 2)
-        self.full_inset_price = round((self.inset_price * self.inset_amount), 2)
-        self.full_cutting_price = round((self.cutting_price * self.cutting + self.full_inset_price), 2)
-        self.complect_price = round(((self.detail_price + self.full_cutting_price) * self.details_amount), 2)
-        self.final_price = round((self.complect_price * self.complects_amount), 2)
+        self.detail_price = round((self.metal_price * self.metal_area), 2) #цена металла для детали: стоимость металла из таблицы * площадь
+        self.full_inset_price = round((self.inset_price * self.inset_amount), 2) #цена врезки: стоимость врезки из таблицы * количество врезок
+        self.full_cutting_price = round((self.cutting_price * self.cutting + self.full_inset_price), 2)  #полная цена резки: цена резки из таблицы * количество резки + цена врезки
+        self.complect_price = round(((self.detail_price + self.full_cutting_price) * self.details_amount), 2) #полная цена детали:(цена металла для детали + полная цена резки) * кол-во деталей
+        self.final_price = round((self.complect_price * self.complects_amount), 2) #цена комплектов: полная цена детали * кол-во комплектов
