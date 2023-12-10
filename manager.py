@@ -10,87 +10,89 @@ class Manager:
     
     def _create_dict(self, values: dict) -> dict:
         """
-        Собирает словарь для создания расчета.
+        Creates a dictionary for the calculation.
         """
         return {
-            'blueprint_name': values['Название чертежа'],
-            'metal_category': values['Категория металла'],
-            'metal_type': values['Тип металла'],
-            'metal_thickness': values["Толщина металла"],
-            'metal_area': values["Площадь металла"],
-            'metal_price': self.table_reader.get_metal_price(values['Тип металла']),
-            'cutting': values["Резка, м. п."],
-            'inset_amount': values["Врезка, количество"],
-            'cutting_price': self.table_reader.get_cutting_price(values['Категория металла'], values["Толщина металла"], values["Количество деталей"]),
-            'inset_price': self.table_reader.get_inset_price(values['Категория металла'], values["Толщина металла"]),
-            'details_amount': values["Количество деталей"],
-            'complects_amount': values["Количество комплектов"],
-            'density': metal_density_dict[values['Категория металла']]
+            'detail_name': values['Detail name'],
+            'metal_category': values['Metal category'],
+            'metal_type': values['Metal type'],
+            'metal_thickness': values["Metal thickness"],
+            'metal_area': values["Metal area"],
+            'metal_price': self.table_reader.get_metal_price(values['Metal type']),
+            'cutting': values["Cutting"],
+            'inset_amount': values["Inset amount"],
+            'cutting_price': self.table_reader.get_cutting_price(values['Metal category'], values["Metal thickness"], values["Details amount"]),
+            'inset_price': self.table_reader.get_inset_price(values['Metal category'], values["Metal thickness"]),
+            'details_amount': values["Details amount"],
+            'complects_amount': values["Complects amount"],
+            'density': metal_density_dict[values['Metal category']]
         }
     
     def _validate_fields_not_empty(self, values: dict):
         """
-        Проверяет, что переданные поля не пустые.
+        Checks if the fields are not empty.
         """
         for index in values:
             value = values[index]
             if value == "":
-                raise ValueError(f"{index}: поле не может быть пустым.")
+                raise ValueError(f"{index}: field can't be empty.")
         
     def _validate_calculation_fields(self, values: dict) -> dict:
         """
-        Проверяет, что переданные поля не пустые, в нужных полях
-        указаны числовые значения правильного числового типа, перезаполняет
-        словарь.
+        Check if the fields are not empty, specific fields have
+        correct numeric values, converts field values to
+        correct data types.
         """
         for index in values:
             value = values[index]
             
             if value == "":
-                raise ValueError(f"{index}: поле не может быть пустым.")
+                raise ValueError(f"{index}: field can't be empty.")
             
             try:
-                if index in ("Площадь металла", "Резка, м. п."):
+                if index in ("Metal area", "Cutting"):
                         values[index] = float(value.replace(',', '.'))
-                elif index in ("Врезка, количество", "Количество деталей", "Количество комплектов"):
+                elif index in ("Inset amount", "Details amount", "Complects amount"):
                         values[index] = int(value)
             except Exception as e:
-                raise ValueError(f"{index}: недопустимое значение.\n{e}")
+                raise ValueError(f"{index}: invalid value.\n{e}")
         
         return values
     
     def _validate_table_path(self, table_path: str) -> None:
         """
-        Проверяет, что в качестве адреса таблицы передан
-        файл Excel.
+        Checks that the chosen path to the spreadsheet
+        is the path to the Excel file.
         """
         if table_path is not None and table_path != "":
             if not table_path.endswith((".xls", ".xlsx")):
-                raise Exception('Пожалуйста, убедитесь что выбраны таблицы формата excel (".xls", ".xlsx").')
+                raise Exception("Please make sure you chose excel files ('.xls', '.xlsx').")
         
     def _check_path_if_exists(self, file_path: str) -> None:
         """
-        Проверяет, существует ли файл по заданному пути.
+        Checks if the file exists.
         """
         if os.path.exists(file_path):
             raise FileExistsError
     
     def get_metals_list(self) -> list:
         """
-        Возвращает список металлов из таблицы с ценами
-        металлов.
+        Returns a list of metals from the metals
+        prices table.
         """
         return self.table_reader.get_metals_list()
     
     def get_file_paths(self) -> tuple:
         """
-        Возвращает пути к таблице с металлами и таблице с расчетами.
+        Returns paths for the prices spreadsheet and
+        the accounting spreadsheet.
         """
         return self.table_reader.metal_prices_table_path, self.saving.accounting_table_path
     
     def save_settings(self, metals_table_path: str = None, calculationing_table_path: str = None, save_for_all: bool = None) -> None:
         """
-        Сохраняет заданные пути таблиц с металлами и расчетами.
+        Sets the paths to the prices spreadsheet and
+        the accounting spreadsheet.
         """
         self._validate_table_path(metals_table_path)
         self._validate_table_path(calculationing_table_path)
@@ -99,7 +101,7 @@ class Manager:
         
     def create_calculation(self, values: dict) -> str:
         """
-        Запускает проверку значений полей и затем создание расчета.
+        Runs the field value check and then creates a calculation.
         """
         values_validated = self._validate_calculation_fields(values)
         data = self._create_dict(values_validated)
@@ -107,34 +109,37 @@ class Manager:
     
     def create_prices_message(self) -> str:
         """
-        Создает строку для вывода стоимости работ.
+        Creates a string with prices and detail info.
         """
-        return (f"Стоимость металла для детали: {self.calculation.detail_price}\n"
-                f"Цена резки и врезки: {self.calculation.full_cutting_price}\n"
-                f"Цена одного комплекта деталей: {self.calculation.complect_price}\n"
-                f"Полная цена: {self.calculation.final_price}\n"
-                f"Масса детали: {self.calculation.mass} кг")
+        return (f"The price of the metal: {self.calculation.detail_price}\n"
+                f"The cutting and inset price: {self.calculation.full_cutting_price}\n"
+                f"One complect price: {self.calculation.complect_price}\n"
+                f"Full price: {self.calculation.final_price}\n"
+                f"Detail's weight: {self.calculation.mass} kg")
     
     def save_calculations(self) -> None:
         """
-        Запускает сохранение расчета в таблицу с расчетами.
+        Runs the saving of the calculation to the accounts
+        table.
         """
         self.saving.save_calculations(self.calculation)
     
     def save_doc_to_print(self, values: dict) -> None:
         """
-        Запускает проверку полей, если поля не пустые, создает
-        путь для файла, запускает проверку, существует ли файл,
-        если нет — запускает сохрание расчета в файл для печати.
+        Runs the field value check, if they are not empty, creates
+        a path for the file and checks is the file by this path
+        exists. If not — runs the creation of the spreadsheet
+        with calculation details by the set path. 
         """
         self._validate_fields_not_empty(values)
-        saving_path = f"{values['Папка']}/{values['Имя']}.xlsx"
+        saving_path = f"{values['Folder']}/{values['Name']}.xlsx"
         self._check_path_if_exists(saving_path)
         self.saving.create_doc_to_print(self.calculation, saving_path)
         
     def overvrite_file(self, values: dict) -> None:
         """
-        Запускает сохранение файла вместо существующего.
+        Runs the creation of the spreadsheet with calculation
+        details with overwriting an existing file.
         """
-        saving_path = f"{values['Папка']}/{values['Имя']}.xlsx"
+        saving_path = f"{values['Folder']}/{values['Name']}.xlsx"
         self.saving.create_doc_to_print(self.calculation, saving_path)

@@ -10,29 +10,30 @@ class Saving:
         
     def _create_calculation_df(self, calculation) -> None:
         """
-        Создает из полей расчета таблицу.
+        Creates a dataframe from the calculation data.
         """
         dict = {
-        'Название чертежа': calculation.blueprint_name,
-        'Материал': calculation.metal_category,
-        'Толщина детали': calculation.metal_thickness,
-        'Площадь детали': calculation.metal_area,
-        'Масса детали': calculation.mass,
-        'Цена детали': calculation.detail_price,
-        'Резка, м.п': calculation.cutting,
-        'Врезка, количество': calculation.inset_amount,
-        'Цена врезки': calculation.full_inset_price,
-        'Цена, рез+врезка': calculation.full_cutting_price,
-        'Количетво деталей': calculation.details_amount,
-        'Стоимость деталей': calculation.complect_price,
-        'Количетво комплектов': calculation.complects_amount,
-        'Стоимость комплектов': calculation.final_price
+        'Detail name': calculation.detail_name,
+        'Material': calculation.metal_category,
+        'Detail thickness': calculation.metal_thickness,
+        'Detail area': calculation.metal_area,
+        'Detail mass': calculation.mass,
+        'Detail price': calculation.detail_price,
+        'Cutting, running m': calculation.cutting,
+        'Inset amount': calculation.inset_amount,
+        'Inset price': calculation.full_inset_price,
+        'Price of cutting + inset': calculation.full_cutting_price,
+        'Details amount': calculation.details_amount,
+        'Details cost': calculation.complect_price,
+        'Complects amount': calculation.complects_amount,
+        'Complects cost': calculation.final_price
         }
         self.calculation_df = pd.DataFrame(dict, index=[0])
         
     def _add_calculation_to_accounts(self) -> None:
         """
-        Объединяет таблицу с расчетами и новый расчет.
+        Unites the previous accounts with a new one into a
+        single dataframe.
         """
         try:
             accounts_df = pd.read_excel(self.accounting_table_path, index_col=0)
@@ -43,15 +44,18 @@ class Saving:
             self._accounts_df = self.calculation_df
             
         except Exception as e:
-            raise Exception(f"Ошибка сохранения.\n{e}")
+            raise Exception(f"Saving error.\n{e}")
     
     def _set_accounting_table_path(self, accounting_table_path: str) -> None:
+        """
+        Sets a path to the accounting spreadsheet.
+        """
         self.accounting_table_path = accounting_table_path
     
     def set_accounting_table_path(self, accounting_table_path: str=None) -> None:
         """
-        Задает путь к таблице с расчетами. Если в функцию не передается аргумент с
-        путем к таблице, задает путь по умолчанию.
+        Sets a path to the accounting spreadsheet. If the path
+        argument is empty, sets it to the default path.
         """
         if accounting_table_path is None:
             accounting_table_path = DEFAULT_ACCOUNTS_TABLE
@@ -60,7 +64,8 @@ class Saving:
         
     def save_calculations(self, calculation: object) -> None:
         """
-        Добавляет расчет к таблице расчетов и сохраняет.
+        Runs the creation of the calculation dataframe and its
+        join with the previous calculations.
         """
         self._create_calculation_df(calculation)
         self._add_calculation_to_accounts()
@@ -73,11 +78,12 @@ class Saving:
                 self._accounts_df.to_excel(self.accounting_table_path)
                 
         except Exception as e:
-            raise Exception(f"Ошибка сохранения.\n{e}")        
+            raise Exception(f"Saving error.\n{e}")        
         
     def create_doc_to_print(self, calculation: object, file_path: str) -> None:
         """
-        Создает файл с текущим расчетом для печати.
+        Creates a spreadsheet with a current calculation
+        for print.
         """
         self._create_calculation_df(calculation)
         
@@ -85,4 +91,4 @@ class Saving:
             with open(file_path, 'w', encoding='utf-8'):
                 self.calculation_df.to_excel(file_path)
         except Exception as e:
-            raise Exception(f"Ошибка сохранения.\n{e}")
+            raise Exception(f"Saving error.\n{e}")
