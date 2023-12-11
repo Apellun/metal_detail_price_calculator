@@ -1,19 +1,15 @@
-# A metal detail making cost calculator
-
-Technologies: Pandas, PySimpleGui
-
-## How to launch:
-
-Download the repository and run the main.py file.
-
-<i>English translation of the interface and a full Readme is coming soon</i>
-
-# Калькулятор стоимости создания деталей из металла
+# Калькулятор стоимости детали из металла
 
 Технологии: Pandas, PySimpleGui
 
 ## Как запустить:
 
 Скачайте репозиторий и запустите main.py.
+Или скачайте архив с исполняемым файлом для вашей системы, распакуйте его и запустите исполняемый файл.
+
+## Что делает
+
+## Сложности, с которыми я столкнулась при разработке
+
 
 <i>Полное Ридми скоро появится</i>
