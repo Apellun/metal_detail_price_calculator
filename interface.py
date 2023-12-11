@@ -163,7 +163,7 @@ class Interface:
         main_layout = [
             [sg.Button('Settings')],
             [sg.Text('Detail name:'), sg.InputText(size=[50, 1], key="Detail name")],
-            [sg.Text('Metal:'), sg.InputCombo(metal_categories_list, key="Metal category", readonly=True), sg.InputCombo(self.metals_list, key="Metal type", readonly=True)],
+            [sg.Text('Metal:'), sg.InputCombo(metal_categories_list, key="Metal category", readonly=True), sg.InputCombo(self.metals_list, key="Metal type", readonly=True, size=[30,1])],
             [sg.Text('Metal thickness, mm:'), sg.InputCombo(metal_thickness_list, key="Metal thickness", readonly=True)],
             [sg.Text('Metal area sq. m:'), sg.InputText(key="Metal area", default_text="1")],
             [sg.Text('Cutting, running m:'), sg.InputText(key="Cutting", default_text="1")],
