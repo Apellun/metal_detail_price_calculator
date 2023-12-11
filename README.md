@@ -1,6 +1,6 @@
 # A metal detail making cost calculator
 
-<b>This is the english version of the app, please switch to presentation_rus for the Russian version</b>
+<b>Это английская версия для презентации, выберите ветку presentation_rus, чтобы посмотреть версию на русском.</b>
 
 Technologies: Pandas, PySimpleGui
 
