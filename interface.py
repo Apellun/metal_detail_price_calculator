@@ -37,7 +37,7 @@ class Interface:
         
         settings_layout = [
             [sg.Text('Таблица со стоимостью металлов:'), sg.InputText(metal_prices_table_path, size=(40,3), key='Путь к таблице металлов'), sg.FileBrowse("Выбрать другой", file_types=(("Excel files", "*.xlsx"), ("Excel files", "*.xls")), key="Таблица металлов")],
-            # [sg.Checkbox('Также установить для стоимостей резки и врезки', key='Установить для всех')],
+            [sg.Checkbox('Также установить для стоимостей резки и врезки', key='Установить для всех')],
             [sg.Text('Таблица для сохранения рассчетов:'), sg.InputText(accounting_table_path, size=(40,3), key='Путь к таблице с рассчетами'), sg.FileBrowse("Выбрать другой", file_types=(("Excel files", "*.xlsx"), ("Excel files", "*.xls")), key="Таблица рассчетов")],
             [sg.Button('Сохранить'), sg.Button('По умолчанию')]           
             ]
@@ -58,7 +58,7 @@ class Interface:
             
             elif event == "Сохранить":
                 try:
-                    self.manager.save_settings(values['Таблица металлов'], values['Таблица рассчетов'])
+                    self.manager.save_settings(values['Таблица металлов'], values['Таблица рассчетов'], values['Установить для всех'])
                     self.main_window['Тип металла'].update(values=self.manager.get_metals_list())
                     self.success_popup("Настройки обновлены.")
                 except Exception as e:
@@ -162,7 +162,7 @@ class Interface:
         main_layout = [
             [sg.Button('Настройки')],
             [sg.Text('Название чертежа:'), sg.InputText(size=[50, 1], key="Название чертежа")],
-            [sg.Text('Металл:'), sg.InputCombo(metal_categories_list, key="Категория металла", readonly=True), sg.InputCombo(self.metals_list, key="Тип металла", readonly=True)],
+            [sg.Text('Металл:'), sg.InputCombo(metal_categories_list, key="Категория металла", readonly=True), sg.InputCombo(self.metals_list, key="Тип металла", readonly=True, size=[30,1])],
             [sg.Text('Толщина металла, мм:'), sg.InputCombo(metal_thickness_list, key="Толщина металла", readonly=True)],
             [sg.Text('Площадь металлаб кв. м:'), sg.InputText(key="Площадь металла", default_text="1")],
             [sg.Text('Резка, пог. м:'), sg.InputText(key="Резка, м. п.", default_text="1")],
@@ -205,48 +205,48 @@ class Interface:
                 
         self.main_window.close()
         
-    # def start(self) -> None:
-    #     """
-    #     Проверяет наличие таблицы со стоимостями металлов
-    #     в папке с приложением. Если таблицы нет, предлагает
-    #     пользователю выбрать файл и после этого запускает основной
-    #     экран приложения.
-    #     """
-    #     choose_spreadsheet_layout = [
-    #         [sg.Text('Таблица со стоимостями металлов по умолчанию не найдена, выберите другую.', size=(40, 2)), sg.FileBrowse("Выбрать", file_types=(("Excel files", "*.xlsx"), ("Excel files", "*.xls")), key="Таблица металлов")],
-    #         [sg.Button('Сохранить')]    
-    #     ]
+    def start(self) -> None:
+        """
+        Проверяет наличие таблицы со стоимостями металлов
+        в папке с приложением. Если таблицы нет, предлагает
+        пользователю выбрать файл и после этого запускает основной
+        экран приложения.
+        """
+        choose_spreadsheet_layout = [
+            [sg.Text('Таблица со стоимостями металлов по умолчанию не найдена, выберите другую.', size=(40, 2)), sg.FileBrowse("Выбрать", file_types=(("Excel files", "*.xlsx"), ("Excel files", "*.xls")), key="Таблица металлов")],
+            [sg.Button('Сохранить')]    
+        ]
         
-    #     choose_spreadsheet_window = sg.Window(
-    #         "Выбор таблицы",
-    #         choose_spreadsheet_layout,
-    #         modal=True,
-    #         default_element_size=[10],
-    #         element_padding=10
-    #         )
+        choose_spreadsheet_window = sg.Window(
+            "Выбор таблицы",
+            choose_spreadsheet_layout,
+            modal=True,
+            default_element_size=[10],
+            element_padding=10
+            )
         
-    #     is_ready = True
+        is_ready = True
         
-    #     while True:
-    #         try:
-    #             self.metals_list = self.manager.get_metals_list()
-    #             break
+        while True:
+            try:
+                self.metals_list = self.manager.get_metals_list()
+                break
                 
-    #         except:
-    #             event, values = choose_spreadsheet_window.read()
+            except:
+                event, values = choose_spreadsheet_window.read()
                 
-    #             if event == sg.WIN_CLOSED:
-    #                 is_ready = False
-    #                 break
+                if event == sg.WIN_CLOSED:
+                    is_ready = False
+                    break
                 
-    #             if event == "Сохранить":
-    #                 self.manager.save_settings(save_for_all=True, metals_table_path=values['Таблица металлов'])
-    #                 self.metals_list = self.manager.get_metals_list()
-    #                 self.success_popup("Таблица установлена")
-    #                 choose_spreadsheet_window.close()
-    #                 break
+                if event == "Сохранить":
+                    self.manager.save_settings(save_for_all=True, metals_table_path=values['Таблица металлов'])
+                    self.metals_list = self.manager.get_metals_list()
+                    self.success_popup("Таблица установлена")
+                    choose_spreadsheet_window.close()
+                    break
         
-    #     if is_ready:       
-    #         self.main()
+        if is_ready:       
+            self.main()
         
-    #     choose_spreadsheet_window.close()
+        choose_spreadsheet_window.close()
