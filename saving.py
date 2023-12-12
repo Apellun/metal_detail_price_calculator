@@ -10,7 +10,7 @@ class Saving:
         
     def _create_calculation_df(self, calculation) -> None:
         """
-        Создает из полей расчета таблицу.
+        Создает из полей расчета датафрейм.
         """
         dict = {
         'Название чертежа': calculation.blueprint_name,
@@ -32,7 +32,8 @@ class Saving:
         
     def _add_calculation_to_accounts(self) -> None:
         """
-        Объединяет таблицу с расчетами и новый расчет.
+        Объединяет датафреймы из таблицы с учетом
+        расчетов и с новым расчетом.
         """
         try:
             accounts_df = pd.read_excel(self.accounting_table_path, index_col=0)
@@ -46,12 +47,17 @@ class Saving:
             raise Exception(f"Ошибка сохранения.\n{e}")
     
     def _set_accounting_table_path(self, accounting_table_path: str) -> None:
+        """
+        Задает новый путь к таблице для учета
+        расчетов.
+        """
         self.accounting_table_path = accounting_table_path
     
     def set_accounting_table_path(self, accounting_table_path: str=None) -> None:
         """
-        Задает путь к таблице с расчетами. Если в функцию не передается аргумент с
-        путем к таблице, задает путь по умолчанию.
+        Зпускает изменение путя к таблице с учетом расчетов.
+        Если в функцию не передается аргумент с путем, передает
+        путь по умолчанию.
         """
         if accounting_table_path is None:
             accounting_table_path = DEFAULT_ACCOUNTS_TABLE
@@ -60,7 +66,8 @@ class Saving:
         
     def save_calculations(self, calculation: object) -> None:
         """
-        Добавляет расчет к таблице расчетов и сохраняет.
+        Запускает создание датафрейма из полей расчета
+        и его сохранение в таблице с учетом расчетов.
         """
         self._create_calculation_df(calculation)
         self._add_calculation_to_accounts()
@@ -77,7 +84,8 @@ class Saving:
         
     def create_doc_to_print(self, calculation: object, file_path: str) -> None:
         """
-        Создает файл с текущим расчетом для печати.
+        Запускает создание датафрейма из полей расчета
+        и создание из него файла для печати.
         """
         self._create_calculation_df(calculation)
         

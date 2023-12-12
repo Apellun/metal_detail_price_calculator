@@ -40,8 +40,8 @@ class Manager:
     def _validate_calculation_fields(self, values: dict) -> dict:
         """
         Проверяет, что переданные поля не пустые, в нужных полях
-        указаны числовые значения правильного числового типа, перезаполняет
-        словарь.
+        указаны правильные числовые значения, перезаполняет
+        словарь данными нужного типа.
         """
         for index in values:
             value = values[index]
@@ -50,7 +50,7 @@ class Manager:
                 raise ValueError(f"{index}: поле не может быть пустым.")
             
             try:
-                if index in ("Площадь металла", "Резка, м. п."):
+                if index in ("Площадь металла", "Резка"):
                         values[index] = float(value.replace(',', '.'))
                 elif index in ("Врезка, количество", "Количество деталей", "Количество комплектов"):
                         values[index] = int(value)
@@ -88,9 +88,10 @@ class Manager:
         """
         return self.table_reader.metal_prices_table_path, self.saving.accounting_table_path
     
-    def save_settings(self, metals_table_path: str = None, calculationing_table_path: str = None, save_for_all: bool = None) -> None:
+    def save_settings(self, metals_table_path: str = None, calculationing_table_path: str = None, save_for_all: bool = False) -> None:
         """
-        Сохраняет заданные пути таблиц с металлами и расчетами.
+        Запускает переустановку путей к таблицам с ценами металлов
+        (и резки и врезки, если save_for_all) и учетом расчетов.
         """
         self._validate_table_path(metals_table_path)
         self._validate_table_path(calculationing_table_path)
@@ -117,15 +118,16 @@ class Manager:
     
     def save_calculations(self) -> None:
         """
-        Запускает сохранение расчета в таблицу с расчетами.
+        Запускает сохранение расчета в таблицу с учетом расчетов.
         """
         self.saving.save_calculations(self.calculation)
     
     def save_doc_to_print(self, values: dict) -> None:
         """
-        Запускает проверку полей, если поля не пустые, создает
-        путь для файла, запускает проверку, существует ли файл,
-        если нет — запускает сохрание расчета в файл для печати.
+        Запускает проверку полученных значений, если они не пустые,
+        создает путь для файла, запускает проверку, существует ли файл
+        по этому пути, если нет — запускает сохрание расчета в файл (для
+        печати).
         """
         self._validate_fields_not_empty(values)
         saving_path = f"{values['Папка']}/{values['Имя']}.xlsx"

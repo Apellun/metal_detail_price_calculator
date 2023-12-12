@@ -8,40 +8,57 @@ class TableReader:
         self.cutting_prices_df = None
         self.metal_prices_df = None
         
-    def _set_metal_prices_table(self, metal_prices_table_path: str, save_for_all: bool = None) -> None:
+    def _set_paths(self, metal_prices_table_path: str, save_for_all: bool) -> None:
         """
-        Создает таблицу со стоимостью металлов.
+        Меняет пути к файлу со стоимостями металлов
+        и к файлу со стоимостями резки/врезки, если
+        save_for_all.
+        """
+        self.metal_prices_table_path = metal_prices_table_path
+        if save_for_all:
+            self.cutting_prices_table_path = metal_prices_table_path
+            
+    def _set_metal_prices_table(self, metal_prices_table_path: str) -> None:
+        """
+        Создает датафрейм со стоимостями металлов.
         """
         try:
-            self.metal_prices_table_path = metal_prices_table_path
             self.metal_prices_df = pd.read_excel(metal_prices_table_path, sheet_name='metal_price', index_col=0)
-            if save_for_all:
-                self.cutting_prices_table_path = metal_prices_table_path
         except Exception as e:
             raise Exception(f'Не удалось прочитать таблицу со стоимостями металлов.\n{e}')
         
     def _set_cutting_prices_table(self, metal_category: str) -> None:
         """
-        Создает таблицу со стоимостью резки и врезки.
+        Создает датафрейм со стоимостями резки и врезки.
         """
         try:
             self.cutting_prices_df = pd.read_excel(self.cutting_prices_table_path, sheet_name=f'cutting_inset {metal_category}', index_col=0)
         except Exception as e:
                 raise Exception(f'Не удалось прочитать таблицу со стоимостями резки и врезки.\n{e}')
             
-    def set_metal_prices_table(self, metal_prices_table_path: str = None, save_for_all: bool = None) -> None:
+    def set_metal_prices_table(self, metal_prices_table_path: str = None, save_for_all: bool = False) -> None:
         """
-        Устанавливает путь к таблице со стоимостями металлов. Если
-        аргумент с путем не передан, устанавливает путь по умолчанию.
+        Запускает создание датафрейма со стоимостями металлов (и
+        резки/врезки, если save_for_all), изменение путей к файлам
+        с ценами. Если аргумент с путем не передан, передает путь
+        по умолчанию.
         """
         if metal_prices_table_path is None:
             metal_prices_table_path = DEFAULT_PRICES_TABLE_PATH
+            
         if metal_prices_table_path != "":
-            self._set_metal_prices_table(metal_prices_table_path, save_for_all)
+            try:
+                self._set_metal_prices_table(metal_prices_table_path)
+                if save_for_all:
+                    self._set_cutting_prices_table(metal_prices_table_path)
+                self._set_paths(metal_prices_table_path, save_for_all)
+            except Exception as e:
+                raise Exception(e)
         
     def get_metals_list(self) -> list:
         """
-        Получает список доступных типов металла из таблицы.
+        Получает список доступных типов металлов из датафрейма
+        со стоимостями металлов.
         """
         if self.metal_prices_df is None:
             self.set_metal_prices_table()
@@ -49,7 +66,7 @@ class TableReader:
         
     def get_metal_price(self, metal_type: str) -> float:
         """
-        Возвращает из таблицы стоимость металла.
+        Возвращает из датафрейма стоимость металла.
         """
         try:
             return float(self.metal_prices_df.loc[metal_type].iloc[0])
@@ -58,7 +75,9 @@ class TableReader:
         
     def get_cutting_price(self, metal_category: str, metal_thickness: float, details_amount: int) -> float:
         """
-        Возвращает из таблицы стоимость резки.
+        Возвращает из датафрейма стоимость резки для
+        указанных категории и толщины металла, учитывая
+        количество деталей.
         """
         if self.cutting_prices_df is None:
             self._set_cutting_prices_table(metal_category)
@@ -73,7 +92,8 @@ class TableReader:
         
     def get_inset_price(self, metal_category: str, metal_thickness: float) -> float:
         """
-        Возвращает из таблицы стоимость врезки.
+        Возвращает из таблицы стоимость врезки для
+        указанных категории и толщины металла.
         """
         if self.cutting_prices_df is None:
             self._set_cutting_prices_table(metal_category)
