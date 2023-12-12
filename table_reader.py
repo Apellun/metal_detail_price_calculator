@@ -8,16 +8,13 @@ class TableReader:
         self.cutting_prices_df = None
         self.metal_prices_df = None
         
-    def _set_paths(self, metal_prices_table_path: str, save_for_all: bool) -> None:
-        """
-        Меняет пути к файлу со стоимостями металлов
-        и к файлу со стоимостями резки/врезки, если
-        save_for_all.
-        """
+        
+    def _set_metal_prices_table_path(self, metal_prices_table_path: str) -> None:
         self.metal_prices_table_path = metal_prices_table_path
-        if save_for_all:
-            self.cutting_prices_table_path = metal_prices_table_path
             
+    def _set_cutting_prices_table_path(self, cutting_prices_table_path: str) -> None:
+        self.cutting_prices_table_path = cutting_prices_table_path
+
     def _set_metal_prices_table(self, metal_prices_table_path: str) -> None:
         """
         Создает датафрейм со стоимостями металлов.
@@ -38,9 +35,8 @@ class TableReader:
             
     def set_metal_prices_table(self, metal_prices_table_path: str = None, save_for_all: bool = False) -> None:
         """
-        Запускает создание датафрейма со стоимостями металлов (и
-        резки/врезки, если save_for_all), изменение путей к файлам
-        с ценами. Если аргумент с путем не передан, передает путь
+        Запускает создание датафрейма со стоимостями металлов, изменение путей
+        к файлам с ценами. Если аргумент с путем не передан, передает путь
         по умолчанию.
         """
         if metal_prices_table_path is None:
@@ -49,9 +45,9 @@ class TableReader:
         if metal_prices_table_path != "":
             try:
                 self._set_metal_prices_table(metal_prices_table_path)
+                self._set_metal_prices_table_path(metal_prices_table_path)
                 if save_for_all:
-                    self._set_cutting_prices_table(metal_prices_table_path)
-                self._set_paths(metal_prices_table_path, save_for_all)
+                    self._set_cutting_prices_table_path(metal_prices_table_path)
             except Exception as e:
                 raise Exception(e)
         
