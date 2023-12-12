@@ -8,15 +8,18 @@ class TableReader:
         self.cutting_prices_df = None
         self.metal_prices_df = None
         
-    def _set_metal_prices_table(self, metal_prices_table_path: str, save_for_all: bool = None) -> None:
+    def _set_metal_prices_table_path(self, metal_prices_table_path: str) -> None:
+        self.metal_prices_table_path = metal_prices_table_path
+            
+    def _set_cutting_prices_table_path(self, cutting_prices_table_path: str) -> None:
+        self.cutting_prices_table_path = cutting_prices_table_path
+            
+    def _set_metal_prices_table(self, metal_prices_table_path: str) -> None:
         """
         Creates a dataframe with metal prices
         """
         try:
-            self.metal_prices_table_path = metal_prices_table_path
             self.metal_prices_df = pd.read_excel(metal_prices_table_path, sheet_name='metal_price', index_col=0)
-            if save_for_all:
-                self.cutting_prices_table_path = metal_prices_table_path
         except Exception as e:
             raise Exception(f'Error reading the metal prices spreadsheet.\n{e}')
         
@@ -36,8 +39,15 @@ class TableReader:
         """
         if metal_prices_table_path is None:
             metal_prices_table_path = DEFAULT_PRICES_TABLE_PATH
+            
         if metal_prices_table_path != "":
-            self._set_metal_prices_table(metal_prices_table_path, save_for_all)
+            try:
+                self._set_metal_prices_table(metal_prices_table_path)
+                self._set_metal_prices_table_path(metal_prices_table_path)
+                if save_for_all:
+                    self._set_cutting_prices_table_path(metal_prices_table_path)
+            except Exception as e:
+                raise Exception(e)
         
     def get_metals_list(self) -> list:
         """
