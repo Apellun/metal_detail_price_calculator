@@ -27,4 +27,4 @@ For now, I tried my best to create workarounds for any possible malfunction. For
 
 Python is not the most popular language for building desktop apps but I did not have the time to learn another language :\) Learning about existing GUI frameworks was interesting. I started with Tkinter and built some of the interface with it, but at some point it became cumbersome and hard to read, so I switched to PySimpleGUI. There was another complication with it, the lack of documentation (or maybe I just wasn't lucky to find a decent one). But ChatGPT helped me with that.
 
-Overall, working on this app was an interesting and enriching experience.
+Overall, working on this app was an interesting and enriching experience. In the future I also plan to add an additional check for the cutting and inset spreadsheet path setting, for the readability.

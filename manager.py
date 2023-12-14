@@ -89,7 +89,7 @@ class Manager:
         """
         return self.table_reader.metal_prices_table_path, self.saving.accounting_table_path
     
-    def save_settings(self, metals_table_path: str = None, calculationing_table_path: str = None, save_for_all: bool = None) -> None:
+    def save_settings(self, metals_table_path: str = None, calculationing_table_path: str = None, save_for_all: bool = False) -> None:
         """
         Sets the paths to the prices spreadsheet and
         the accounting spreadsheet.
@@ -112,7 +112,7 @@ class Manager:
         Creates a string with prices and detail info.
         """
         return (f"The price of the metal: {self.calculation.detail_price}\n"
-                f"The cutting and inset price: {self.calculation.full_cutting_price}\n"
+                f"The price of cutting and inset: {self.calculation.full_cutting_price}\n"
                 f"One complect price: {self.calculation.complect_price}\n"
                 f"Full price: {self.calculation.final_price}\n"
                 f"Detail's weight: {self.calculation.mass} kg")

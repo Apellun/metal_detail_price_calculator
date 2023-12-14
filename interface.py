@@ -174,7 +174,7 @@ class Interface:
         ]
         
         main_window = sg.Window(
-            "РMetal detail price calculator",
+            "Metal detail price calculator",
             main_layout,
             default_element_size=[10],
             element_padding=10
