@@ -19,7 +19,7 @@ class Manager:
             'metal_thickness': values["Толщина металла"],
             'metal_area': values["Площадь металла"],
             'metal_price': self.table_reader.get_metal_price(values['Тип металла']),
-            'cutting': values["Резка, м. п."],
+            'cutting': values["Резка"],
             'inset_amount': values["Врезка, количество"],
             'cutting_price': self.table_reader.get_cutting_price(values['Категория металла'], values["Толщина металла"], values["Количество деталей"]),
             'inset_price': self.table_reader.get_inset_price(values['Категория металла'], values["Толщина металла"]),
@@ -114,7 +114,7 @@ class Manager:
                 f"Цена резки и врезки: {self.calculation.full_cutting_price}\n"
                 f"Цена одного комплекта деталей: {self.calculation.complect_price}\n"
                 f"Полная цена: {self.calculation.final_price}\n"
-                f"Масса детали: {self.calculation.mass} кг")
+                f"Масса детали, кг: {self.calculation.mass} кг")
     
     def save_calculations(self) -> None:
         """

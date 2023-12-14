@@ -15,14 +15,14 @@ class Saving:
         dict = {
         'Название чертежа': calculation.blueprint_name,
         'Материал': calculation.metal_category,
-        'Толщина детали': calculation.metal_thickness,
-        'Площадь детали': calculation.metal_area,
-        'Масса детали': calculation.mass,
+        'Толщина детали, мм': calculation.metal_thickness,
+        'Площадь детали, кв. м': calculation.metal_area,
+        'Масса детали, кг': calculation.mass,
         'Цена детали': calculation.detail_price,
         'Резка, м.п': calculation.cutting,
         'Врезка, количество': calculation.inset_amount,
         'Цена врезки': calculation.full_inset_price,
-        'Цена, рез+врезка': calculation.full_cutting_price,
+        'Цена резки и врезки': calculation.full_cutting_price,
         'Количетво деталей': calculation.details_amount,
         'Стоимость деталей': calculation.complect_price,
         'Количетво комплектов': calculation.complects_amount,
@@ -39,6 +39,8 @@ class Saving:
             accounts_df = pd.read_excel(self.accounting_table_path, index_col=0)
             self._accounts_df = pd.concat([accounts_df, self.calculation_df]).reset_index(drop=True)
             self._accounts_df.index = self._accounts_df.index + 1
+            
+            print(self._accounts_df)
             
         except FileNotFoundError:
             self._accounts_df = self.calculation_df

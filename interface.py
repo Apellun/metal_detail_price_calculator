@@ -66,7 +66,7 @@ class Interface:
                     self.exception_popup(e)
                     
             elif event == "По умолчанию":
-                self.manager.save_settings()
+                self.manager.save_settings(save_for_all=True)
                 self.main_window['Тип металла'].update(values=self.manager.get_metals_list())
                 metal_prices_table_path, accounting_table_path = self.manager.get_file_paths()
                 settings_window['Путь к таблице металлов'].update(metal_prices_table_path)
@@ -171,7 +171,7 @@ class Interface:
             [sg.Text('Название чертежа:'), sg.InputText(size=[50, 1], key="Название чертежа")],
             [sg.Text('Металл:'), sg.InputCombo(metal_categories_list, key="Категория металла", readonly=True), sg.InputCombo(self.metals_list, key="Тип металла", readonly=True, size=[30,1])],
             [sg.Text('Толщина металла, мм:'), sg.InputCombo(metal_thickness_list, key="Толщина металла", readonly=True)],
-            [sg.Text('Площадь металлаб кв. м:'), sg.InputText(key="Площадь металла", default_text="1")],
+            [sg.Text('Площадь металла, кв. м:'), sg.InputText(key="Площадь металла", default_text="1")],
             [sg.Text('Резка, пог. м:'), sg.InputText(key="Резка", default_text="1")],
             [sg.Text('Врезка, количество:'), sg.InputText(key="Врезка, количество", default_text="1")],
             [sg.Text('Количество деталей:'), sg.InputText(key="Количество деталей", default_text="1")],
